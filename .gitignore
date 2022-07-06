@@ -13,3 +13,8 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# For incident history service
+/IncidentHistoryService/.vs/
+/IncidentHistoryService/IncidentHistoryService/bin/
+/IncidentHistoryService/IncidentHistoryService/obj/
