@@ -1,0 +1,5 @@
+services:
+  go:
+    build: ./preventive-works
+    ports:
+      - 8000:8080
