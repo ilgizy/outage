@@ -1,0 +1,7 @@
+services:
+  incidenthistory:
+    build:
+      context: .
+      dockerfile: IncidentHistoryService/Dockerfile
+    ports:
+      - 8081:80
