@@ -1,5 +1,8 @@
+version: "1.0"
+
 services:
-  go:
+  preventive-works:
+    container_name: preventive-works
     build: ./preventive-works
     ports:
       - 8000:8080
