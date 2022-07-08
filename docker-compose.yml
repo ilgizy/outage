@@ -1,7 +1,14 @@
 services:
   incidenthistory:
+    container_name: incident-history
     build:
       context: .
       dockerfile: IncidentHistoryService/Dockerfile
     ports:
-      - 8081:80
+      - 8000:80
+
+  preventive-works:
+    container_name: preventive-works
+    build: ./preventive-works
+    ports:
+      - 8001:8080
