@@ -15,6 +15,7 @@
 # vendor/
 
 # For incident history service
-/IncidentHistoryService/.vs/
-/IncidentHistoryService/IncidentHistoryService/bin/
-/IncidentHistoryService/IncidentHistoryService/obj/
+/**/.vs/
+/**/bin/
+/**/obj/
+/**/.idea/
