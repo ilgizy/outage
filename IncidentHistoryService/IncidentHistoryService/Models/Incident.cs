@@ -69,9 +69,9 @@
         public string UnavailableService { get; set; }
 
         /// <summary>
-        /// Недоступная во время инцидента зона
+        /// Недоступные во время инцидента зоны
         /// </summary>
-        public string UnavailableZone { get; set; }
+        public List<string> UnavailableZones { get; set; }
 
         /// <summary>
         /// Список тегов
@@ -85,6 +85,7 @@
 
         public Incident()
         {
+            UnavailableZones = new List<string>();
             Tags = new List<string>();
             History = new List<HistoryMark>();
         }
