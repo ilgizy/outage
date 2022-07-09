@@ -89,5 +89,17 @@
             Tags = new List<string>();
             History = new List<HistoryMark>();
         }
+
+        /// <summary>
+        /// Добавление отметки в истории
+        /// </summary>
+        /// <param name="id">Идентификатор отметки</param>
+        /// <param name="comment">Комментарий отметки</param>
+        /// <param name="date">Время отметки</param>
+        /// <param name="tag">Тег отметки</param>
+        public void AddMark(int id, string comment, DateTimeOffset date, string tag)
+        {
+            History.Add(new HistoryMark(id, comment, date, tag, this));
+        }
     }
 }
