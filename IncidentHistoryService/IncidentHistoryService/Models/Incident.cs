@@ -83,6 +83,13 @@
         /// </summary>
         public List<HistoryMark> History { get; set; }
 
+        /// <summary>
+        /// Конструктор по умолчанию<br/>
+        /// Инициализирует списки<br/>
+        /// - UnavailableZones<br/>
+        /// - Tags<br/>
+        /// - History
+        /// </summary>
         public Incident()
         {
             UnavailableZones = new List<string>();
