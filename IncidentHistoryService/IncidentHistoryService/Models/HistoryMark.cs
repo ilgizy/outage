@@ -31,26 +31,20 @@
         public int IncidentId { get; set; }
 
         /// <summary>
-        /// Инцидент, к которому относится отметка
-        /// </summary>
-        public Incident Incident { get; set; }
-
-        /// <summary>
         /// Конструктор с параметрами
         /// </summary>
         /// <param name="id">Идентификатор</param>
         /// <param name="comment">Комментарий</param>
         /// <param name="date">Время</param>
         /// <param name="tag">Тег</param>
-        /// <param name="incident">Инцидент, к которому относится отметка</param>
-        public HistoryMark(int id, string comment, DateTimeOffset date, string tag, Incident incident)
+        /// <param name="incidentId">Идентификатор инцидента, к которому относится отметка</param>
+        public HistoryMark(int id, string comment, DateTimeOffset date, string tag, int incidentId)
         {
             Id = id;
             Comment = comment;
             Date = date;
             Tag = tag;
-            IncidentId = incident.Id;
-            Incident = incident;
+            IncidentId = incidentId;
         }
     }
 }

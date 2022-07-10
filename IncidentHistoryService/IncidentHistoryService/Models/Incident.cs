@@ -115,7 +115,7 @@
         /// <param name="tag">Тег отметки</param>
         public void AddMark(int id, string comment, DateTimeOffset date, string tag)
         {
-            History.Add(new HistoryMark(id, comment, date, tag, this));
+            History.Add(new HistoryMark(id, comment, date, tag, this.Id));
         }
     }
 }
