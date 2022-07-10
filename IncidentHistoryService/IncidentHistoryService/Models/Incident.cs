@@ -27,7 +27,7 @@
             get
             {
                 if (History.Count == 0) return null;
-                return History[0].Date;
+                return History.MinBy(x => x.Date).Date;
             }
         }
 
@@ -43,7 +43,7 @@
             get
             {
                 if (History.Count == 0) return null;
-                return History.Last().Date;
+                return History.MaxBy(x => x.Date).Date;
             }
         }
 
@@ -59,7 +59,7 @@
             get
             {
                 if (History.Count == 0) return null;
-                return History[0].Comment;
+                return History.MaxBy(x => x.Date).Comment;
             }
         }
 
