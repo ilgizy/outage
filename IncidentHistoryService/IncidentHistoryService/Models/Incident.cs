@@ -84,18 +84,27 @@
         public List<HistoryMark> History { get; set; }
 
         /// <summary>
-        /// Конструктор по умолчанию<br/>
-        /// Инициализирует списки<br/>
-        /// - UnavailableZones<br/>
-        /// - Tags<br/>
-        /// - History
+        /// Конструктор с параметрами
         /// </summary>
-        public Incident()
+        /// <param name="id">Идентификатор</param>
+        /// <param name="name">Заголовок</param>
+        /// <param name="unavailableService">Недоступный во время инцидента сервис</param>
+        /// <param name="unavailableZones">Недоступные во время инцидента зоны</param>
+        /// <param name="tags">Список тегов</param>
+        public Incident(int id, string name, string unavailableService, List<string> unavailableZones, List<string> tags)
         {
-            UnavailableZones = new List<string>();
-            Tags = new List<string>();
+            Id = id;
+            Name = name;
+            UnavailableService = unavailableService;
+            UnavailableZones = unavailableZones;
+            Tags = tags;
             History = new List<HistoryMark>();
         }
+
+        /// <summary>
+        /// Конструктор по умолчанию<br/>
+        /// </summary>
+        public Incident() : this(0, "", "", new List<string>(), new List<string>()) { }
 
         /// <summary>
         /// Добавление отметки в истории
