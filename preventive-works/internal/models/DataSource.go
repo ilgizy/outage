@@ -105,4 +105,29 @@ func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 	return nil
 }
 
+func (ds DataSource) GetServiceJson() []byte {
+	var services []byte
+	for _, service := range ds.Service {
+		serviceJSON, _ := json.Marshal(service)
+		services = append(services, serviceJSON...)
+	}
+	return services
+}
+
+func (ds DataSource) GetPreventiveWorkJson() []byte {
+	var preventiveWork []byte
+	for _, work := range ds.PreventiveWork {
+		workJSON, _ := json.Marshal(work)
+		preventiveWork = append(preventiveWork, workJSON...)
+	}
+	return preventiveWork
+}
+
+func (ds DataSource) GetEventJson() []byte {
+	var events []byte
+	for _, event := range ds.Event {
+		eventJSON, _ := json.Marshal(event)
+		events = append(events, eventJSON...)
+	}
+	return events
 }
