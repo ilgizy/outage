@@ -10,4 +10,5 @@ type PreventiveWork struct {
 	Description string    `json:"description"`
 	CountEvent  int       `json:"count_event"`
 	IdService   int       `json:"id_service"`
+	Events      []Event   `json:"events"`
 }

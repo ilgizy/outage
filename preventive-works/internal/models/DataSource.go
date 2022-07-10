@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type DataSource struct {
 	Service        []Service        `json:"service"`
@@ -73,7 +76,7 @@ func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, id
 	ds.Event = append(ds.Event, event)
 }
 
-func (ds *DataSource) addNewEvent(idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
+func (ds *DataSource) AddNewEvent(idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
 	event := Event{
 		Id:               idEvent,
 		CreateAt:         createAt,
@@ -83,5 +86,23 @@ func (ds *DataSource) addNewEvent(idEvent int, idPreventiveWork int, createAt ti
 		IdPreventiveWork: idPreventiveWork,
 	}
 	ds.Event = append(ds.Event, event)
+}
+
+func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
+	for _, work := range ds.PreventiveWork {
+		if work.Id == id {
+			var events []Event
+			for _, event := range ds.Event {
+				if event.IdPreventiveWork == id {
+				}
+				events = append(events, event)
+			}
+			work.Events = events
+			preventiveWork, _ := json.Marshal(&work)
+			return preventiveWork
+		}
+	}
+	return nil
+}
 
 }
