@@ -82,5 +82,26 @@ namespace IncidentHistoryService.Controllers
                 return Ok(incident);
             return BadRequest();
         }
+
+        /// <summary>
+        /// Метод добавления отметки в историю инцидента
+        /// </summary>
+        /// <param name="incidentId">Идентификатор инцидента</param>
+        /// <param name="markId">Идентификатор метки</param>
+        /// <param name="comment">Комментарий метки</param>
+        /// <param name="date">Время метки</param>
+        /// <param name="tag">Тег метки</param>
+        /// <returns>
+        /// 200 - успешное добавление, возвращает созданную метку<br/>
+        /// 400 - добавление не удалось
+        /// </returns>
+        [HttpPut]
+        public ActionResult<HistoryMark> Put(int incidentId, int markId, string comment, string date, string tag)
+        {
+            HistoryMark historyMark = new(markId, comment, DateTimeOffset.Parse(date), tag, incidentId);
+            if (_storage.Add(historyMark))
+                return Ok(historyMark);
+            return BadRequest();
+        }
     }
 }
