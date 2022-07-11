@@ -22,15 +22,18 @@ namespace IncidentHistoryService.Controllers
         /// </summary>
         public IncidentController()
         {
-            Incident incident_1 = new(1, "Проблемы с Cloud", "Cloud", new() { "Russia", "German" }, new() { "Serious" });
-            incident_1.AddMark(1, "Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022"), "Investigation");
-            incident_1.AddMark(2, "Проблема была решена", DateTimeOffset.Parse("12.07.2022"), "Resolved");
+            if (_storage.Incidents.Count() == 0)
+            {
+                Incident incident_1 = new(1, "Проблемы с Cloud", "Cloud", new() { "Russia", "German" }, new() { "Serious" });
+                incident_1.AddMark(1, "Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022"), "Investigation");
+                incident_1.AddMark(2, "Проблема была решена", DateTimeOffset.Parse("12.07.2022"), "Resolved");
 
-            Incident incident_2 = new(2, "Проблемы с DNS", "DNS", new() { "France", "Spain" }, new() { "Small" });
-            incident_2.AddMark(3, "Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022"), "Investigation");
+                Incident incident_2 = new(2, "Проблемы с DNS", "DNS", new() { "France", "Spain" }, new() { "Small" });
+                incident_2.AddMark(3, "Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022"), "Investigation");
 
-            _storage.Add(incident_1);
-            _storage.Add(incident_2);
+                _storage.Add(incident_1);
+                _storage.Add(incident_2);
+            }
         }
 
         /// <summary>
