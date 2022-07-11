@@ -19,6 +19,9 @@ func main() {
 	router = gin.Default()
 	handler := handlers.NewHandler(ds)
 	handler.Register(router)
-	router.Run()
+	err := router.Run()
+	if err != nil {
+		return
+	}
 
 }
