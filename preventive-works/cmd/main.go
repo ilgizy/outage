@@ -8,10 +8,11 @@ import (
 
 var router *gin.Engine
 
+// @title           preventive-works
+// @version         1.0
+// @description     API для отслеживания профилактических работ
+// @host      localhost:8080
 func main() {
-	// @title           Swagger Example API
-	// @version         1.0
-	// @host      localhost:8080
 
 	var ds models.DataSource
 	ds.New()

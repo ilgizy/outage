@@ -1,0 +1,81 @@
+definitions:
+  models.Event:
+    properties:
+      create_at:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      id_preventive_work:
+        type: integer
+      status:
+        type: string
+    type: object
+  models.PreventiveWork:
+    properties:
+      count_event:
+        type: integer
+      create_at:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/models.Event'
+        type: array
+      id:
+        type: integer
+      id_service:
+        type: integer
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для отслеживания профилактических работ
+  title: preventive-works
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PreventiveWork'
+            type: array
+      summary: отображение всех профилактических работ
+      tags:
+      - PreventiveWorks
+  /{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: PreventiveWork id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PreventiveWork'
+      summary: отображение профилактической работы по id
+      tags:
+      - PreventiveWork
+swagger: "2.0"
