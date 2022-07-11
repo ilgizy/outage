@@ -59,5 +59,28 @@ namespace IncidentHistoryService.Controllers
                 return NotFound();
             return new ObjectResult(incident);
         }
+        
+        /// <summary>
+        /// Метод создания нового инцидента
+        /// </summary>
+        /// <param name="id">Идентификатор</param>
+        /// <param name="name">Заголовок</param>
+        /// <param name="unavailableService">Недоступный во время инцидента сервис</param>
+        /// <param name="unavailableZones">Недоступные во время инцидента зоны</param>
+        /// <param name="tags">Теги</param>
+        /// <returns>
+        /// 200 - успешное добавление, возвращает созданный инцидент<br/>
+        /// 400 - добавление не удалось
+        /// </returns>
+        [HttpPost]
+        public ActionResult<Incident> Post(int id, string name, string unavailableService,
+            [FromQuery] List<string> unavailableZones, [FromQuery] List<string> tags)
+        {
+            Incident incident = new(id, name, unavailableService, unavailableZones, tags);
+
+            if (_storage.Add(incident))
+                return Ok(incident);
+            return BadRequest();
+        }
     }
 }
