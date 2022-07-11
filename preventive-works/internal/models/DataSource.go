@@ -94,8 +94,9 @@ func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 			var events []Event
 			for _, event := range ds.Event {
 				if event.IdPreventiveWork == id {
+					events = append(events, event)
 				}
-				events = append(events, event)
+
 			}
 			work.Events = events
 			preventiveWork, _ := json.Marshal(&work)
