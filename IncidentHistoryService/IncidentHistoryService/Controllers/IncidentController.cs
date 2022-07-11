@@ -1,6 +1,7 @@
 ﻿using IncidentHistoryService.Models;
 using IncidentHistoryService.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace IncidentHistoryService.Controllers
 {
@@ -17,6 +18,11 @@ namespace IncidentHistoryService.Controllers
         private static IContainable _storage = new VirtualDataSource();
 
         /// <summary>
+        /// Настройка для российского формата даты
+        /// </summary>
+        private static CultureInfo _cultureInfo = new CultureInfo("ru-RU", false);
+
+        /// <summary>
         /// Конструктор по умолчанию<br/>
         /// Создает начальные сущности
         /// </summary>
@@ -25,11 +31,11 @@ namespace IncidentHistoryService.Controllers
             if (_storage.Incidents.Count() == 0)
             {
                 Incident incident_1 = new(1, "Проблемы с Cloud", "Cloud", new() { "Russia", "German" }, new() { "Serious" });
-                incident_1.AddMark(1, "Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022"), "Investigation");
-                incident_1.AddMark(2, "Проблема была решена", DateTimeOffset.Parse("12.07.2022"), "Resolved");
+                incident_1.AddMark(1, "Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022", _cultureInfo), "Investigation");
+                incident_1.AddMark(2, "Проблема была решена", DateTimeOffset.Parse("12.07.2022", _cultureInfo), "Resolved");
 
                 Incident incident_2 = new(2, "Проблемы с DNS", "DNS", new() { "France", "Spain" }, new() { "Small" });
-                incident_2.AddMark(3, "Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022"), "Investigation");
+                incident_2.AddMark(3, "Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022", _cultureInfo), "Investigation");
 
                 _storage.Add(incident_1);
                 _storage.Add(incident_2);
@@ -98,7 +104,7 @@ namespace IncidentHistoryService.Controllers
         [HttpPut]
         public ActionResult<HistoryMark> Put(int incidentId, int markId, string comment, string date, string tag)
         {
-            HistoryMark historyMark = new(markId, comment, DateTimeOffset.Parse(date), tag, incidentId);
+            HistoryMark historyMark = new(markId, comment, DateTimeOffset.Parse(date, _cultureInfo), tag, incidentId);
             if (_storage.Add(historyMark))
                 return Ok(historyMark);
             return BadRequest();
