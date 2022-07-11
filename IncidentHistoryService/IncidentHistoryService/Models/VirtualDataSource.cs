@@ -44,8 +44,14 @@ namespace IncidentHistoryService.Models
 
         public bool Add(HistoryMark historyMark)
         {
-            _historyMarks.Add(historyMark);
-            return true;
+            int index = _incidents.FindIndex(x => x.Id == historyMark.IncidentId);
+            if (index >= 0)
+            {
+                _incidents[index].AddMark(historyMark.Id, historyMark.Comment, historyMark.Date, historyMark.Tag);
+                _historyMarks.Add(historyMark);
+                return true;
+            }
+            return false;
         }
     }
 }
