@@ -51,7 +51,7 @@ namespace IncidentHistoryService.Controllers
         [HttpGet("{id}")]
         public ActionResult<IEnumerable<Incident>> Get(int id)
         {
-            Incident incident = _storage.Incidents.FirstOrDefault(x => x.Id == id);
+            Incident? incident = _storage.Incidents.FirstOrDefault(x => x.Id == id);
             if (incident == null)
                 return NotFound();
             return new ObjectResult(incident);
