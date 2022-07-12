@@ -78,9 +78,9 @@ func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Tim
 	ds.Event = append(ds.Event, event)
 }
 
-func (ds *DataSource) AddNewEvent(idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
+func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
 	event := Event{
-		Id:               idEvent,
+		Id:               len(ds.Event),
 		CreateAt:         createAt,
 		Deadline:         deadline,
 		Description:      description,
