@@ -38,6 +38,7 @@ func (ds *DataSource) New() {
 	}
 }
 
+//добавление новой профилактической работы
 func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
 	flag := true
 	var s = Service{}
@@ -78,6 +79,7 @@ func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Tim
 	ds.Event = append(ds.Event, event)
 }
 
+// добавление нового события в профилактическую работу
 func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
 	event := Event{
 		Id:               len(ds.Event),
@@ -90,6 +92,7 @@ func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, dead
 	ds.Event = append(ds.Event, event)
 }
 
+//Возвращает профилактическую работу в формате json по ее id
 func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 	for _, work := range ds.PreventiveWork {
 		if work.Id == id {
@@ -108,6 +111,7 @@ func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 	return nil
 }
 
+//Возвращает список всех сервисов в формате json
 func (ds DataSource) GetServiceJson() []byte {
 	var services []byte
 	for _, service := range ds.Service {
@@ -117,6 +121,7 @@ func (ds DataSource) GetServiceJson() []byte {
 	return services
 }
 
+//Возвращает список всех профилактических работ в формате json
 func (ds DataSource) GetPreventiveWorkJson() []byte {
 	var preventiveWork []byte
 	for _, work := range ds.PreventiveWork {
@@ -126,6 +131,7 @@ func (ds DataSource) GetPreventiveWorkJson() []byte {
 	return preventiveWork
 }
 
+//Возвращает список всех событий в формате json
 func (ds DataSource) GetEventJson() []byte {
 	var events []byte
 	for _, event := range ds.Event {
