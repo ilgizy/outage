@@ -8,6 +8,7 @@ import (
 	"github.com/swaggo/gin-swagger"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Handler interface {
@@ -25,8 +26,8 @@ func NewHandler(ds models.DataSource) Handler {
 func (h *handler) Register(router *gin.Engine) {
 
 	router.GET("/preventive_works", h.ShowPreventiveWorks)
-
 	router.GET("/preventive_works/:id", h.ShowPreventiveWork)
+	router.POST("/preventive_works/new_work", h.NewPreventiveWork)
 
 	docs.SwaggerInfo.Title = "preventive-works"
 	docs.SwaggerInfo.Description = "API для отслеживания профилактических работ"
@@ -44,9 +45,17 @@ func (h *handler) Register(router *gin.Engine) {
 // @Success      200  {object}  models.PreventiveWork
 // @Router       /{id} [get]
 func (h *handler) ShowPreventiveWork(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	c.Data(http.StatusOK, gin.MIMEJSON, h.ds.FindPreventiveWorkByID(id))
-	return
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	data := h.ds.FindPreventiveWorkByID(id)
+	if data == nil {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	c.Data(http.StatusOK, gin.MIMEJSON, data)
 }
 
 // ShowPreventiveWorks
@@ -57,6 +66,41 @@ func (h *handler) ShowPreventiveWork(c *gin.Context) {
 // @Success      200  {object}  []models.PreventiveWork
 // @Router       / [get]
 func (h *handler) ShowPreventiveWorks(c *gin.Context) {
+	data := h.ds.GetPreventiveWorkJson()
+	if len(data) == 0 {
+		c.String(http.StatusOK, "Профилактические работы отсутствуют")
+		return
+	}
 	c.Data(http.StatusOK, gin.MIMEJSON, h.ds.GetPreventiveWorkJson())
+
 	//c.AsciiJSON(http.StatusOK, string(h.ds.GetPreventiveWorkJson()))
+}
+
+// NewPreventiveWork
+// @Tags         NewPreventiveWork
+// @Summary      добавление новой профилактической работы
+// @Param        name_service    formData     string  true  "Имя сервиса"
+// @Param        create_at    formData     string  true  "Дата создания профил. работы"
+// @Param        deadline    formData     string  true  "Дата окончания профил. работы"
+// @Param        title    formData     string  true  "Название профил. работы"
+// @Param        description    formData     string  true  "Описание профил. работы"
+// @Success      200
+// @Router       /new_work [post]
+func (h *handler) NewPreventiveWork(c *gin.Context) {
+	nameService := c.PostForm("name_service")
+	createAtString := c.PostForm("create_at")
+	deadlineSTring := c.PostForm("deadline")
+	title := c.PostForm("title")
+	description := c.PostForm("description")
+
+	createAt, err := time.Parse("2006-01-02 15:04:05", createAtString)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+	}
+	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+	}
+	h.ds.AddNewPreventiveWork(nameService, createAt, deadline, title, description)
+	c.Status(http.StatusOK)
 }

@@ -78,4 +78,38 @@ paths:
       summary: отображение профилактической работы по id
       tags:
       - PreventiveWork
+  /new_work:
+    post:
+      parameters:
+      - description: Имя сервиса
+        in: formData
+        name: name_service
+        required: true
+        type: string
+      - description: Дата создания профил. работы
+        in: formData
+        name: create_at
+        required: true
+        type: string
+      - description: Дата окончания профил. работы
+        in: formData
+        name: deadline
+        required: true
+        type: string
+      - description: Название профил. работы
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Описание профил. работы
+        in: formData
+        name: description
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+      summary: добавление новой профилактической работы
+      tags:
+      - NewPreventiveWork
 swagger: "2.0"

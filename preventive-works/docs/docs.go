@@ -41,6 +41,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/new_work": {
+            "post": {
+                "tags": [
+                    "NewPreventiveWork"
+                ],
+                "summary": "добавление новой профилактической работы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Имя сервиса",
+                        "name": "name_service",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дата создания профил. работы",
+                        "name": "create_at",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дата окончания профил. работы",
+                        "name": "deadline",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название профил. работы",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Описание профил. работы",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/{id}": {
             "get": {
                 "consumes": [

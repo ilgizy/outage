@@ -38,31 +38,33 @@ func (ds *DataSource) New() {
 	}
 }
 
-func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, idPreventiveWork int, createAt time.Time, deadline time.Time, title string, description string) {
+func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
 	flag := true
+	var s = Service{}
 	for _, service := range ds.Service {
-		if idService == service.Id {
+		if nameService == service.Name {
 			flag = false
+			s = service
 		}
 	}
 	if flag {
 		service := Service{
 			Name: nameService,
-			Id:   idService,
+			Id:   len(ds.Service),
 		}
+		s = service
 		ds.Service = append(ds.Service, service)
 	}
 
 	preventiveWork := PreventiveWork{
-		Id:          idPreventiveWork,
+		Id:          len(ds.PreventiveWork),
 		CreateAt:    createAt,
 		Deadline:    deadline,
 		Title:       title,
 		Description: description,
 		CountEvent:  1,
-		IdService:   idService,
+		IdService:   s.Id,
 	}
-	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
 
 	event := Event{
 		Id:               0,
@@ -70,9 +72,9 @@ func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, id
 		Deadline:         deadline,
 		Description:      description,
 		Status:           "Запланированно",
-		IdPreventiveWork: idPreventiveWork,
+		IdPreventiveWork: len(ds.PreventiveWork),
 	}
-
+	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
 	ds.Event = append(ds.Event, event)
 }
 
