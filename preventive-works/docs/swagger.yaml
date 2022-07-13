@@ -1,0 +1,165 @@
+definitions:
+  models.Event:
+    properties:
+      create_at:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      id_preventive_work:
+        type: integer
+      status:
+        type: string
+    type: object
+  models.PreventiveWork:
+    properties:
+      count_event:
+        type: integer
+      create_at:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/models.Event'
+        type: array
+      id:
+        type: integer
+      id_service:
+        type: integer
+      title:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для отслеживания профилактических работ
+  title: preventive-works
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PreventiveWork'
+            type: array
+      summary: отображение всех профилактических работ
+      tags:
+      - PreventiveWorks
+  /{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: PreventiveWork id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PreventiveWork'
+      summary: отображение профилактической работы по id
+      tags:
+      - PreventiveWork
+  /{id}/new_event:
+    put:
+      parameters:
+      - description: id профилактической работы
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Статус события
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: Дата создания события
+        in: formData
+        name: create_at
+        required: true
+        type: string
+      - description: Дата окончания события
+        in: formData
+        name: deadline
+        required: true
+        type: string
+      - description: Описание события
+        in: formData
+        name: description
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+      summary: добавление новой профилактической работы
+      tags:
+      - NewPreventiveWork
+  /event:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Event'
+            type: array
+      summary: отображение всех профилактических работ
+      tags:
+      - Event
+  /new_work:
+    post:
+      parameters:
+      - description: Имя сервиса
+        in: formData
+        name: name_service
+        required: true
+        type: string
+      - description: Дата создания профил. работы
+        in: formData
+        name: create_at
+        required: true
+        type: string
+      - description: Дата окончания профил. работы
+        in: formData
+        name: deadline
+        required: true
+        type: string
+      - description: Название профил. работы
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Описание профил. работы
+        in: formData
+        name: description
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+      summary: добавление новой профилактической работы
+      tags:
+      - NewPreventiveWork
+swagger: "2.0"
