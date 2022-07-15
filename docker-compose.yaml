@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:14.4
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2458173671
+      - POSTGRES_DB=IncidentHistoryServiceDB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   incidenthistory:
     container_name: incident-history
     build:
@@ -6,6 +21,11 @@ services:
       dockerfile: IncidentHistoryService/Dockerfile
     ports:
       - 8100:80
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=IncidentHistoryServiceDB;Username=postgres;Password=2458173671;Include Error Detail=true
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   preventive-works:
     container_name: preventive-works
