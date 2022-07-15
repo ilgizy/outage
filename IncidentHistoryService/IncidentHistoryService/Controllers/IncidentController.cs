@@ -1,6 +1,6 @@
 ﻿using IncidentHistoryService.Models;
-using IncidentHistoryService.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace IncidentHistoryService.Controllers
@@ -13,11 +13,6 @@ namespace IncidentHistoryService.Controllers
     public class IncidentController : ControllerBase
     {
         /// <summary>
-        /// Внутреннее хранилище
-        /// </summary>
-        private static IContainable _storage = new VirtualDataSource();
-
-        /// <summary>
         /// Настройка для российского формата даты
         /// </summary>
         private static CultureInfo _cultureInfo = new CultureInfo("ru-RU", false);
@@ -28,17 +23,22 @@ namespace IncidentHistoryService.Controllers
         /// </summary>
         public IncidentController()
         {
-            if (_storage.Incidents.Count() == 0)
+            using ApplicationContext db = new();
+            if (!db.Incidents.Any())
             {
-                Incident incident_1 = new(1, "Проблемы с Cloud", "Cloud", new() { "Russia", "German" }, new() { "Serious" });
-                incident_1.AddMark(1, "Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022", _cultureInfo), "Investigation");
-                incident_1.AddMark(2, "Проблема была решена", DateTimeOffset.Parse("12.07.2022", _cultureInfo), "Resolved");
+                Incident incident_1 = new("Проблемы с Cloud", "Cloud", new() { "Russia", "German" }, new() { "Serious" });
+                HistoryMark mark_1 = new("Проблема была обнаружена", DateTimeOffset.Parse("10.07.2022", _cultureInfo), "Investigation", incident_1);
+                HistoryMark mark_2 = new("Проблема была решена", DateTimeOffset.Parse("12.07.2022", _cultureInfo), "Resolved", incident_1);
 
-                Incident incident_2 = new(2, "Проблемы с DNS", "DNS", new() { "France", "Spain" }, new() { "Small" });
-                incident_2.AddMark(3, "Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022", _cultureInfo), "Investigation");
+                Incident incident_2 = new("Проблемы с DNS", "DNS", new() { "France", "Spain" }, new() { "Small" });
+                HistoryMark mark_3 = new("Проблема была обнаружена", DateTimeOffset.Parse("11.07.2022", _cultureInfo), "Investigation", incident_2);
 
-                _storage.Add(incident_1);
-                _storage.Add(incident_2);
+                db.Incidents.Add(incident_1);
+                db.Incidents.Add(incident_2);
+                db.HistoryMarks.Add(mark_1);
+                db.HistoryMarks.Add(mark_2);
+                db.HistoryMarks.Add(mark_3);
+                db.SaveChanges();
             }
         }
 
@@ -49,7 +49,8 @@ namespace IncidentHistoryService.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Incident>> Get()
         {
-            return new ObjectResult(_storage.Incidents);
+            using ApplicationContext db = new();
+            return new ObjectResult(db.Incidents.Include(x => x.HistoryMarks).ToList());
         }
 
         /// <summary>
@@ -60,7 +61,8 @@ namespace IncidentHistoryService.Controllers
         [HttpGet("{id}")]
         public ActionResult<IEnumerable<Incident>> Get(int id)
         {
-            Incident? incident = _storage.Incidents.FirstOrDefault(x => x.Id == id);
+            using ApplicationContext db = new();
+            Incident? incident = db.Incidents.Include(x => x.HistoryMarks).FirstOrDefault(x => x.Id == id);
             if (incident == null)
                 return NotFound();
             return new ObjectResult(incident);
@@ -69,31 +71,30 @@ namespace IncidentHistoryService.Controllers
         /// <summary>
         /// Метод создания нового инцидента
         /// </summary>
-        /// <param name="id">Идентификатор</param>
         /// <param name="name">Заголовок</param>
         /// <param name="unavailableService">Недоступный во время инцидента сервис</param>
         /// <param name="unavailableZones">Недоступные во время инцидента зоны</param>
         /// <param name="tags">Теги</param>
         /// <returns>
         /// 200 - успешное добавление, возвращает созданный инцидент<br/>
-        /// 400 - добавление не удалось
         /// </returns>
         [HttpPost]
-        public ActionResult<Incident> Post(int id, string name, string unavailableService,
+        public ActionResult<Incident> Post(string name, string unavailableService,
             [FromQuery] List<string> unavailableZones, [FromQuery] List<string> tags)
         {
-            Incident incident = new(id, name, unavailableService, unavailableZones, tags);
+            Incident incident = new(name, unavailableService, unavailableZones, tags);
 
-            if (_storage.Add(incident))
-                return Ok(incident);
-            return BadRequest();
+            using ApplicationContext db = new();
+            db.Incidents.Add(incident);
+            db.SaveChanges();
+
+            return Ok(incident);
         }
 
         /// <summary>
         /// Метод добавления отметки в историю инцидента
         /// </summary>
         /// <param name="incidentId">Идентификатор инцидента</param>
-        /// <param name="markId">Идентификатор метки</param>
         /// <param name="comment">Комментарий метки</param>
         /// <param name="date">Время метки</param>
         /// <param name="tag">Тег метки</param>
@@ -102,12 +103,21 @@ namespace IncidentHistoryService.Controllers
         /// 400 - добавление не удалось
         /// </returns>
         [HttpPut]
-        public ActionResult<HistoryMark> Put(int incidentId, int markId, string comment, string date, string tag)
+        public ActionResult<HistoryMark> Put(int incidentId, string comment, string date, string tag)
         {
-            HistoryMark historyMark = new(markId, comment, DateTimeOffset.Parse(date, _cultureInfo), tag, incidentId);
-            if (_storage.Add(historyMark))
-                return Ok(historyMark);
-            return BadRequest();
+            using ApplicationContext db = new();
+
+            Incident? incident = db.Incidents.Include(x => x.HistoryMarks).FirstOrDefault(x => x.Id == incidentId);
+            if (incident == null)
+                return BadRequest();
+
+            HistoryMark historyMark = new(comment, DateTimeOffset.Parse(date, _cultureInfo), tag, incident);
+
+            incident.HistoryMarks.Add(historyMark);
+            db.Update(incident);
+            db.SaveChanges();
+
+            return Ok(historyMark);
         }
     }
 }

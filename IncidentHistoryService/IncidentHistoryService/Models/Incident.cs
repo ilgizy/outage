@@ -19,15 +19,15 @@
         /// Время начала инцидента
         /// </summary>
         /// <returns>
-        /// Время первой отметки из History<br/>
+        /// Время первой отметки из HistoryMarks<br/>
         /// Если History не содержит элементов, вернет null
         /// </returns>
         public DateTimeOffset? StartDate
         {
             get
             {
-                if (History.Count == 0) return null;
-                return History.MinBy(x => x.Date).Date;
+                if (HistoryMarks.Count == 0) return null;
+                return HistoryMarks.MinBy(x => x.Date).Date;
             }
         }
 
@@ -35,15 +35,15 @@
         /// Время окончания инцидента
         /// </summary>
         /// <returns>
-        /// Время последней отметки из History<br/>
+        /// Время последней отметки из HistoryMarks<br/>
         /// Если History не содержит элементов, вернет null
         /// </returns>
         public DateTimeOffset? EndDate
         {
             get
             {
-                if (History.Count == 0) return null;
-                return History.MaxBy(x => x.Date).Date;
+                if (HistoryMarks.Count == 0) return null;
+                return HistoryMarks.MaxBy(x => x.Date).Date;
             }
         }
 
@@ -51,15 +51,15 @@
         /// Последний комментарий
         /// </summary>
         /// <returns>
-        /// Комментарий последней отметки из History<br/>
+        /// Комментарий последней отметки из HistoryMarks<br/>
         /// Если History не содержит элементов, вернет null
         /// </returns>
         public string? LastComment
         {
             get
             {
-                if (History.Count == 0) return null;
-                return History.MaxBy(x => x.Date).Comment;
+                if (HistoryMarks.Count == 0) return null;
+                return HistoryMarks.MaxBy(x => x.Date).Comment;
             }
         }
 
@@ -81,41 +81,24 @@
         /// <summary>
         /// Список отметок для ведения истории инцидента
         /// </summary>
-        public List<HistoryMark> History { get; set; }
+        public List<HistoryMark> HistoryMarks { get; set; }
 
         /// <summary>
-        /// Конструктор с параметрами
+        /// Конструктор с параметрами<br/>
+        /// Ориентирован на работу с БД
         /// </summary>
-        /// <param name="id">Идентификатор</param>
         /// <param name="name">Заголовок</param>
         /// <param name="unavailableService">Недоступный во время инцидента сервис</param>
         /// <param name="unavailableZones">Недоступные во время инцидента зоны</param>
         /// <param name="tags">Список тегов</param>
-        public Incident(int id, string name, string unavailableService, List<string> unavailableZones, List<string> tags)
+        public Incident(string name, string unavailableService, List<string> unavailableZones, List<string> tags)
         {
-            Id = id;
+            Id = default;
             Name = name;
             UnavailableService = unavailableService;
             UnavailableZones = unavailableZones;
             Tags = tags;
-            History = new List<HistoryMark>();
-        }
-
-        /// <summary>
-        /// Конструктор по умолчанию<br/>
-        /// </summary>
-        public Incident() : this(0, "", "", new List<string>(), new List<string>()) { }
-
-        /// <summary>
-        /// Добавление отметки в истории
-        /// </summary>
-        /// <param name="id">Идентификатор отметки</param>
-        /// <param name="comment">Комментарий отметки</param>
-        /// <param name="date">Время отметки</param>
-        /// <param name="tag">Тег отметки</param>
-        public void AddMark(int id, string comment, DateTimeOffset date, string tag)
-        {
-            History.Add(new HistoryMark(id, comment, date, tag, this.Id));
+            HistoryMarks = new List<HistoryMark>();
         }
     }
 }

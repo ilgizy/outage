@@ -1,4 +1,6 @@
-﻿namespace IncidentHistoryService.Models
+﻿using System.Text.Json.Serialization;
+
+namespace IncidentHistoryService.Models
 {
     /// <summary>
     /// Отметка в истории инцидента
@@ -31,6 +33,12 @@
         public int IncidentId { get; set; }
 
         /// <summary>
+        /// Инцидент, к которому относится отметка
+        /// </summary>
+        [JsonIgnore]
+        public Incident Incident { get; set; }
+
+        /// <summary>
         /// Конструктор с параметрами
         /// </summary>
         /// <param name="id">Идентификатор</param>
@@ -45,6 +53,23 @@
             Date = date;
             Tag = tag;
             IncidentId = incidentId;
+        }
+
+        /// <summary>
+        /// Конструктор с параметрами<br/>
+        /// Ориентирован на работу с БД
+        /// </summary>
+        /// <param name="comment">Комментарий</param>
+        /// <param name="date">Время</param>
+        /// <param name="tag">Тег</param>
+        /// <param name="incident">Инцидент, к которому относится отметка</param>
+        public HistoryMark(string comment, DateTimeOffset date, string tag, Incident incident)
+        {
+            Id = default;
+            Comment = comment;
+            Date = date;
+            Tag = tag;
+            Incident = incident;
         }
     }
 }
