@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewClient(ctx context.Context, host, port, username, password string) (db *mongo.Client, err error) {
+func NewClient(ctx context.Context, host, port, username, password, database string) (db *mongo.Database, err error) {
 	var mongoDBURL string
 	mongoDBURL = fmt.Sprintf("mongodb://%s:%s@%s:%s", username, password, host, port)
 
@@ -26,5 +26,5 @@ func NewClient(ctx context.Context, host, port, username, password string) (db *
 		return nil, fmt.Errorf("failed to ping mongoDB due to error: %v", err)
 	}
 
-	return client, nil
+	return client.Database(database), nil
 }
