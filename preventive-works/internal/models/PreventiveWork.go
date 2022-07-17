@@ -3,7 +3,7 @@ package models
 import "time"
 
 type PreventiveWork struct {
-	Id          int       `json:"id" bson:"id"`
+	Id          string    `json:"id" bson:"id"`
 	CreateAt    time.Time `json:"create_at" bson:"create_at"`
 	Deadline    time.Time `json:"deadline" bson:"deadline"`
 	Title       string    `json:"title" bson:"title"`

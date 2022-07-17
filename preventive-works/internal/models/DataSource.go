@@ -105,11 +105,25 @@ func (ds DataSource) GetServiceJson() []byte {
 }
 
 //Возвращает список всех профилактических работ в формате json
-func (ds DataSource) GetPreventiveWorkJson() []byte {
+func (ds DataSource) GetPreventiveWorkJson(ctx context.Context) []byte {
 	var preventiveWork []byte
-	for _, work := range ds.PreventiveWork {
-		workJSON, _ := json.Marshal(work)
-		preventiveWork = append(preventiveWork, workJSON...)
+	collection := ds.db.Collection("PreventiveWork")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result PreventiveWork
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		preventiveWorkJSON, _ := json.Marshal(result)
+		preventiveWork = append(preventiveWork, preventiveWorkJSON...)
+	}
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
 	}
 	return preventiveWork
 }
