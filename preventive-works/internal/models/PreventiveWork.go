@@ -10,5 +10,5 @@ type PreventiveWork struct {
 	Description string    `json:"description" bson:"description"`
 	CountEvent  int       `json:"count_event" bson:"count_event"`
 	IdService   int       `json:"id_service" bson:"id_service"`
-	Events      []Event   `json:"events" bson:"events"`
+	Events      []string  `json:"events" bson:"events"`
 }

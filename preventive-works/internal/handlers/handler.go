@@ -8,6 +8,7 @@ import (
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"net/http"
+	"time"
 )
 
 type Handler interface {
@@ -36,14 +37,14 @@ func (h *handler) Register(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
-// ShowPreventiveWork
-// @Tags         PreventiveWork
-// @Summary      отображение профилактической работы по id
-// @Param        id   path      int  true  "PreventiveWork id"
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  models.PreventiveWork
-// @Router       /{id} [get]
+//ShowPreventiveWork
+//@Tags         PreventiveWork
+//@Summary      отображение профилактической работы по id
+//@Param        id   path      string  true  "PreventiveWork id"
+//@Accept       json
+//@Produce      json
+//@Success      200  {object}  models.PreventiveWork
+//@Router       /{id} [get]
 func (h *handler) ShowPreventiveWork(c *gin.Context) {
 	id := c.Param("id")
 	data := h.ds.FindPreventiveWorkByID(id, context.TODO())
@@ -104,7 +105,7 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 // NewEvent
 // @Tags         NewPreventiveWork
 // @Summary      добавление новой профилактической работы
-// @Param        id   path      int  true  "id профилактической работы"
+// @Param        id   path      string  true  "id профилактической работы"
 // @Param        status    formData     string  true  "Статус события"
 // @Param        create_at    formData     string  true  "Дата создания события"
 // @Param        deadline    formData     string  true  "Дата окончания события"
@@ -113,11 +114,7 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 // @Router       /{id}/new_event [put]
 func (h *handler) NewEvent(c *gin.Context) {
 	//idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
+	id := c.Param("id")
 	status := c.PostForm("status")
 	createAtString := c.PostForm("create_at")
 	deadlineSTring := c.PostForm("deadline")
@@ -131,6 +128,6 @@ func (h *handler) NewEvent(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 	}
-	h.ds.AddNewEvent(id, createAt, deadline, description, status)
+	h.ds.AddNewEvent(context.TODO(), id, createAt, deadline, description, status)
 	c.Status(http.StatusOK)
 }

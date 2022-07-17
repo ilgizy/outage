@@ -11,7 +11,7 @@ var router *gin.Engine
 // @title           preventive-works
 // @version         1.0
 // @description     API для отслеживания профилактических работ
-// @host      localhost:8080
+// @host      localhost:8101
 func main() {
 
 	var ds models.DataSource

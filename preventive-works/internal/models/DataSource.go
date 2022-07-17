@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+	"time"
 )
 
 type DataSource struct {
@@ -64,16 +65,28 @@ func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Tim
 }
 
 // добавление нового события в профилактическую работу
-func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
+func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) {
+	collection := ds.db.Collection("Events")
 	event := Event{
-		Id:               len(ds.Event),
 		CreateAt:         createAt,
 		Deadline:         deadline,
 		Description:      description,
 		Status:           status,
 		IdPreventiveWork: idPreventiveWork,
 	}
-	ds.Event = append(ds.Event, event)
+	res, err := collection.InsertOne(ctx, event)
+	if err != nil {
+		log.Fatal(err)
+	}
+	id := res.InsertedID
+	idObject, _ := primitive.ObjectIDFromHex(idPreventiveWork)
+	collection2 := ds.db.Collection("PreventiveWork")
+	filter := bson.M{"id": idObject}
+	update := bson.M{"$push": bson.M{"events": id}}
+	_, err = collection2.UpdateOne(ctx, filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 //Возвращает профилактическую работу в формате json по ее id

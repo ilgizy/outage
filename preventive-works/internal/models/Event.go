@@ -8,5 +8,5 @@ type Event struct {
 	Deadline         time.Time `json:"deadline" bson:"deadline"`
 	Description      string    `json:"description" bson:"description"`
 	Status           string    `json:"status" bson:"status"`
-	IdPreventiveWork int       `json:"id_preventive_work" bson:"id_preventive_work"`
+	IdPreventiveWork string    `json:"id_preventive_work" bson:"id_preventive_work"`
 }
