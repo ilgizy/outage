@@ -3,12 +3,11 @@ package handlers
 import (
 	"PreventiveWork/docs"
 	"PreventiveWork/internal/models"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type Handler interface {
@@ -67,12 +66,12 @@ func (h *handler) ShowPreventiveWork(c *gin.Context) {
 // @Success      200  {object}  []models.PreventiveWork
 // @Router       / [get]
 func (h *handler) ShowPreventiveWorks(c *gin.Context) {
-	data := h.ds.GetPreventiveWorkJson()
+	data := h.ds.GetPreventiveWorkJson(context.TODO())
 	if len(data) == 0 {
 		c.String(http.StatusOK, "Профилактические работы отсутствуют")
 		return
 	}
-	c.Data(http.StatusOK, gin.MIMEJSON, h.ds.GetPreventiveWorkJson())
+	c.Data(http.StatusOK, gin.MIMEJSON, data)
 
 	//c.AsciiJSON(http.StatusOK, string(h.ds.GetPreventiveWorkJson()))
 }
