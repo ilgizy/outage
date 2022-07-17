@@ -143,11 +143,25 @@ func (ds DataSource) GetPreventiveWorkJson(ctx context.Context) []byte {
 }
 
 //Возвращает список всех событий в формате json
-func (ds DataSource) GetEventJson() []byte {
+func (ds DataSource) GetEventJson(ctx context.Context) []byte {
 	var events []byte
-	for _, event := range ds.Event {
-		eventJSON, _ := json.Marshal(event)
-		events = append(events, eventJSON...)
+	collection := ds.db.Collection("Events")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result Event
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		eventsJSON, _ := json.Marshal(result)
+		events = append(events, eventsJSON...)
+	}
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
 	}
 	return events
 }
