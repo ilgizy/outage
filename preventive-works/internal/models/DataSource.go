@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 )
@@ -76,22 +77,19 @@ func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, dead
 }
 
 //Возвращает профилактическую работу в формате json по ее id
-func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
-	for _, work := range ds.PreventiveWork {
-		if work.Id == id {
-			var events []Event
-			for _, event := range ds.Event {
-				if event.IdPreventiveWork == id {
-					events = append(events, event)
-				}
-
-			}
-			work.Events = events
-			preventiveWork, _ := json.Marshal(&work)
-			return preventiveWork
-		}
+func (ds *DataSource) FindPreventiveWorkByID(id string, ctx context.Context) []byte {
+	var result PreventiveWork
+	collection := ds.db.Collection("PreventiveWork")
+	idObject, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{"id", idObject}}
+	err := collection.FindOne(ctx, filter).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return nil
+	} else if err != nil {
+		log.Fatal(err)
 	}
-	return nil
+	preventiveWork, _ := json.Marshal(&result)
+	return preventiveWork
 }
 
 //Возвращает список всех сервисов в формате json

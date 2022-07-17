@@ -45,12 +45,8 @@ func (h *handler) Register(router *gin.Engine) {
 // @Success      200  {object}  models.PreventiveWork
 // @Router       /{id} [get]
 func (h *handler) ShowPreventiveWork(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.Status(http.StatusBadRequest)
-		return
-	}
-	data := h.ds.FindPreventiveWorkByID(id)
+	id := c.Param("id")
+	data := h.ds.FindPreventiveWorkByID(id, context.TODO())
 	if data == nil {
 		c.Status(http.StatusNotFound)
 		return
