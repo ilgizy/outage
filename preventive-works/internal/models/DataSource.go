@@ -1,41 +1,24 @@
 package models
 
 import (
+	"PreventiveWork/pkg/client/mongodb"
+	"context"
 	"encoding/json"
-	"time"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 type DataSource struct {
-	Service        []Service        `json:"service"`
-	Event          []Event          `json:"event"`
-	PreventiveWork []PreventiveWork `json:"preventive_work"`
+	db *mongo.Database
 }
 
 func (ds *DataSource) New() {
-	ds.Service = []Service{
-		{Name: "Go", Id: 0},
-		{Name: "С#", Id: 1},
+	client, err := mongodb.NewClient(context.TODO(), "mongo", "27017", "root", "root", "PreventiveWork")
+	if err != nil {
+		return
 	}
-
-	ds.PreventiveWork = []PreventiveWork{
-		{Id: 0, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача1", Description: "Описание задачи 1", CountEvent: 3, IdService: 1},
-		{Id: 1, CreateAt: time.Date(2022, time.June, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача2", Description: "Описание задачи 2", CountEvent: 3, IdService: 0},
-		{Id: 2, CreateAt: time.Date(2022, time.February, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача3", Description: "Описание задачи 3", CountEvent: 3, IdService: 1},
-	}
-
-	ds.Event = []Event{
-		{Id: 0, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 0},
-		{Id: 1, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 0},
-		{Id: 2, CreateAt: time.Date(2022, time.March, 4, 17, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 17, 30, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 0},
-
-		{Id: 3, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 1},
-		{Id: 4, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 1},
-		{Id: 5, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 1},
-
-		{Id: 6, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 2},
-		{Id: 7, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 2},
-		{Id: 8, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 2},
-	}
+	ds.db = client
 }
 
 //добавление новой профилактической работы

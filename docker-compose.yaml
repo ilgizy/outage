@@ -12,9 +12,11 @@ services:
     build: ./preventive-works
     ports:
       - 8101:8080
+    depends_on:
+      - mongo
 
   mongo:
-    image: mongo
+    image: mongo:4.2
     restart: always
     container_name: mongo-dev
     environment:
@@ -22,7 +24,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
       MONGO_INITDB_DATABASE: preventive_works
     ports:
-      - '27017:27017'
+      - 27017:27017
 
   mongo-express:
     image: mongo-express
