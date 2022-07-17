@@ -95,11 +95,25 @@ func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 }
 
 //Возвращает список всех сервисов в формате json
-func (ds DataSource) GetServiceJson() []byte {
+func (ds DataSource) GetServiceJson(ctx context.Context) []byte {
 	var services []byte
-	for _, service := range ds.Service {
-		serviceJSON, _ := json.Marshal(service)
+	collection := ds.db.Collection("Service")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result Service
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		serviceJSON, _ := json.Marshal(result)
 		services = append(services, serviceJSON...)
+	}
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
 	}
 	return services
 }

@@ -2,5 +2,5 @@ package models
 
 type Service struct {
 	Name string `json:"name" bson:"name"`
-	Id   int    `json:"id" bson:"id"`
+	Id   string `json:"id" bson:"id"`
 }
