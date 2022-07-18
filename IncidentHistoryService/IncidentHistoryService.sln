@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncidentHistoryService", "IncidentHistoryService\IncidentHistoryService.csproj", "{9F2E9B64-6BF8-427E-9D5A-F4F888C8B8B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IncidentHistoryService", "IncidentHistoryService\IncidentHistoryService.csproj", "{8340F417-3CFC-4306-804E-78C4CBAA27D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9F2E9B64-6BF8-427E-9D5A-F4F888C8B8B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F2E9B64-6BF8-427E-9D5A-F4F888C8B8B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F2E9B64-6BF8-427E-9D5A-F4F888C8B8B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F2E9B64-6BF8-427E-9D5A-F4F888C8B8B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8340F417-3CFC-4306-804E-78C4CBAA27D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8340F417-3CFC-4306-804E-78C4CBAA27D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8340F417-3CFC-4306-804E-78C4CBAA27D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8340F417-3CFC-4306-804E-78C4CBAA27D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D431EDDC-32A3-41AC-8046-700F5C2DD05A}
+		SolutionGuid = {C71303E0-B9B4-4374-8376-31A9E8B1906E}
 	EndGlobalSection
 EndGlobal
