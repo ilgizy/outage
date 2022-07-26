@@ -8,7 +8,6 @@ type PreventiveWork struct {
 	Deadline    time.Time `json:"deadline" bson:"deadline"`
 	Title       string    `json:"title" bson:"title"`
 	Description string    `json:"description" bson:"description"`
-	CountEvent  int       `json:"count_event" bson:"count_event"`
-	IdService   int       `json:"id_service" bson:"id_service"`
-	Events      []string  `json:"events" bson:"events"`
+	IdService   string    `json:"id_service" bson:"id_service"`
+	Events      []Event   `json:"events" bson:"events"`
 }

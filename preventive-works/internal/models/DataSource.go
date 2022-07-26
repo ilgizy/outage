@@ -23,67 +23,65 @@ func (ds *DataSource) New() {
 	ds.db = client
 }
 
-//добавление новой профилактической работы
-func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
-	flag := true
-	var s = Service{}
-	for _, service := range ds.Service {
-		if nameService == service.Name {
-			flag = false
-			s = service
-		}
-	}
-	if flag {
-		service := Service{
-			Name: nameService,
-			Id:   len(ds.Service),
-		}
-		s = service
-		ds.Service = append(ds.Service, service)
-	}
-
-	preventiveWork := PreventiveWork{
-		Id:          len(ds.PreventiveWork),
-		CreateAt:    createAt,
-		Deadline:    deadline,
-		Title:       title,
-		Description: description,
-		CountEvent:  1,
-		IdService:   s.Id,
-	}
-
-	event := Event{
-		Id:               0,
-		CreateAt:         createAt,
-		Deadline:         deadline,
-		Description:      description,
-		Status:           "Запланированно",
-		IdPreventiveWork: len(ds.PreventiveWork),
-	}
-	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
-	ds.Event = append(ds.Event, event)
-}
+//
+////добавление новой профилактической работы
+//func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
+//	flag := true
+//	var s = Service{}
+//	for _, service := range ds.Service {
+//		if nameService == service.Name {
+//			flag = false
+//			s = service
+//		}
+//	}
+//	if flag {
+//		service := Service{
+//			Name: nameService,
+//		}
+//
+//		collection := ds.db.Collection("Service")
+//		res, err := collection.InsertOne(ctx, service)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//		s = service
+//	}
+//
+//	preventiveWork := PreventiveWork{
+//		CreateAt:    createAt,
+//		Deadline:    deadline,
+//		Title:       title,
+//		Description: description,
+//		CountEvent:  1,
+//		IdService:   s.Id,
+//	}
+//
+//	event := Event{
+//		Id:               0,
+//		CreateAt:         createAt,
+//		Deadline:         deadline,
+//		Description:      description,
+//		Status:           "Запланированно",
+//		IdPreventiveWork: len(ds.PreventiveWork),
+//	}
+//	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
+//	ds.Event = append(ds.Event, event)
+//}
 
 // добавление нового события в профилактическую работу
 func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) {
-	collection := ds.db.Collection("Events")
 	event := Event{
-		CreateAt:         createAt,
-		Deadline:         deadline,
-		Description:      description,
-		Status:           status,
-		IdPreventiveWork: idPreventiveWork,
+		CreateAt:    createAt,
+		Deadline:    deadline,
+		Description: description,
+		Status:      status,
 	}
-	res, err := collection.InsertOne(ctx, event)
-	if err != nil {
-		log.Fatal(err)
-	}
-	id := res.InsertedID
+
 	idObject, _ := primitive.ObjectIDFromHex(idPreventiveWork)
-	collection2 := ds.db.Collection("PreventiveWork")
-	filter := bson.M{"id": idObject}
-	update := bson.M{"$push": bson.M{"events": id}}
-	_, err = collection2.UpdateOne(ctx, filter, update)
+	collection := ds.db.Collection("PreventiveWork")
+	filter := bson.M{"_id": idObject}
+	update := bson.M{"$push": bson.M{"events": event}}
+	_, err := collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,7 +92,7 @@ func (ds *DataSource) FindPreventiveWorkByID(id string, ctx context.Context) []b
 	var result PreventiveWork
 	collection := ds.db.Collection("PreventiveWork")
 	idObject, _ := primitive.ObjectIDFromHex(id)
-	filter := bson.D{{"id", idObject}}
+	filter := bson.D{{"_id", idObject}}
 	err := collection.FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return nil
@@ -175,4 +173,27 @@ func (ds DataSource) GetEventJson(ctx context.Context) []byte {
 		log.Fatal(err)
 	}
 	return events
+}
+
+//возвращает список сервисов
+func (ds DataSource) getServices(ctx context.Context) []Service {
+	var services []Service
+	collection := ds.db.Collection("Service")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result Service
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		services = append(services, result)
+	}
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return services
 }
