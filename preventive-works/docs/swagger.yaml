@@ -7,17 +7,11 @@ definitions:
         type: string
       description:
         type: string
-      id:
-        type: integer
-      id_preventive_work:
-        type: integer
       status:
         type: string
     type: object
   models.PreventiveWork:
     properties:
-      count_event:
-        type: integer
       create_at:
         type: string
       deadline:
@@ -29,13 +23,13 @@ definitions:
           $ref: '#/definitions/models.Event'
         type: array
       id:
-        type: integer
+        type: string
       id_service:
-        type: integer
+        type: string
       title:
         type: string
     type: object
-host: localhost:8080
+host: localhost:8101
 info:
   contact: {}
   description: API для отслеживания профилактических работ
@@ -67,7 +61,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -85,7 +79,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Статус события
         in: formData
         name: status
@@ -112,22 +106,6 @@ paths:
       summary: добавление новой профилактической работы
       tags:
       - NewPreventiveWork
-  /event:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Event'
-            type: array
-      summary: отображение всех профилактических работ
-      tags:
-      - Event
   /new_work:
     post:
       parameters:

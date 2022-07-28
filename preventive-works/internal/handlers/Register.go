@@ -10,7 +10,7 @@ import (
 
 type Handler interface {
 	Register(router *gin.Engine)
-
+}
 
 type handler struct {
 	ds models.DataSource
@@ -24,7 +24,7 @@ func (h *handler) Register(router *gin.Engine) {
 
 	router.GET("/preventive_works", h.ShowPreventiveWorks)
 	router.GET("/preventive_works/:id", h.ShowPreventiveWork)
-	//router.POST("/preventive_works/new_work", h.NewPreventiveWork)
+	router.POST("/preventive_works/new_work", h.NewPreventiveWork)
 	router.PUT("/preventive_works/:id/new_event", h.NewEvent)
 
 	docs.SwaggerInfo.Title = "preventive-works"

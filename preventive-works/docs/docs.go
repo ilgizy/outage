@@ -41,31 +41,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/event": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Event"
-                ],
-                "summary": "отображение всех профилактических работ",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Event"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/new_work": {
             "post": {
                 "tags": [
@@ -130,7 +105,7 @@ const docTemplate = `{
                 "summary": "отображение профилактической работы по id",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "PreventiveWork id",
                         "name": "id",
                         "in": "path",
@@ -155,7 +130,7 @@ const docTemplate = `{
                 "summary": "добавление новой профилактической работы",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "id профилактической работы",
                         "name": "id",
                         "in": "path",
@@ -211,12 +186,6 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "id_preventive_work": {
-                    "type": "integer"
-                },
                 "status": {
                     "type": "string"
                 }
@@ -225,9 +194,6 @@ const docTemplate = `{
         "models.PreventiveWork": {
             "type": "object",
             "properties": {
-                "count_event": {
-                    "type": "integer"
-                },
                 "create_at": {
                     "type": "string"
                 },
@@ -244,10 +210,10 @@ const docTemplate = `{
                     }
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "id_service": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -260,7 +226,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8101",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "preventive-works",

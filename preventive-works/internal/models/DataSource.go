@@ -23,50 +23,47 @@ func (ds *DataSource) New() {
 	ds.db = client
 }
 
-//
-////добавление новой профилактической работы
-//func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
-//	flag := true
-//	var s = Service{}
-//	for _, service := range ds.Service {
-//		if nameService == service.Name {
-//			flag = false
-//			s = service
-//		}
-//	}
-//	if flag {
-//		service := Service{
-//			Name: nameService,
-//		}
-//
-//		collection := ds.db.Collection("Service")
-//		res, err := collection.InsertOne(ctx, service)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		s = service
-//	}
-//
-//	preventiveWork := PreventiveWork{
-//		CreateAt:    createAt,
-//		Deadline:    deadline,
-//		Title:       title,
-//		Description: description,
-//		CountEvent:  1,
-//		IdService:   s.Id,
-//	}
-//
-//	event := Event{
-//		Id:               0,
-//		CreateAt:         createAt,
-//		Deadline:         deadline,
-//		Description:      description,
-//		Status:           "Запланированно",
-//		IdPreventiveWork: len(ds.PreventiveWork),
-//	}
-//	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
-//	ds.Event = append(ds.Event, event)
-//}
+//добавление новой профилактической работы
+func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) {
+	//проверяет есть ли сервис с таким именем, если есть, то запоминаем его id, если нет, то добавляем новый
+	services := ds.getServices(ctx)
+	flag := true
+	var idService primitive.ObjectID
+	for _, service := range services {
+		if nameService == service.Name {
+			flag = false
+			idService = service.Id
+		}
+	}
+	if flag {
+		ds.addService(ctx, nameService)
+	}
+
+	//создание первого события в профилактической работе
+	event := Event{
+		CreateAt:    createAt,
+		Deadline:    deadline,
+		Description: description,
+		Status:      "Запланированно",
+	}
+	var events []Event
+	events = append(events, event)
+	preventiveWork := PreventiveWork{
+		CreateAt:    createAt,
+		Deadline:    deadline,
+		Title:       title,
+		Description: description,
+		IdService:   idService,
+		Events:      events,
+	}
+
+	//добавление профилактической работы в базу данных
+	collection := ds.db.Collection("PreventiveWork")
+	_, err := collection.InsertOne(ctx, preventiveWork)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 // добавление нового события в профилактическую работу
 func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) {
@@ -151,37 +148,14 @@ func (ds DataSource) GetPreventiveWorkJson(ctx context.Context) []byte {
 	return preventiveWork
 }
 
-//Возвращает список всех событий в формате json
-func (ds DataSource) GetEventJson(ctx context.Context) []byte {
-	var events []byte
-	collection := ds.db.Collection("Events")
-	cur, err := collection.Find(ctx, bson.D{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cur.Close(ctx)
-	for cur.Next(ctx) {
-		var result Event
-		err := cur.Decode(&result)
-		if err != nil {
-			log.Fatal(err)
-		}
-		eventsJSON, _ := json.Marshal(result)
-		events = append(events, eventsJSON...)
-	}
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return events
-}
-
-//возвращает список сервисов
+// возвращает список всех сервисов
 func (ds DataSource) getServices(ctx context.Context) []Service {
 	var services []Service
 	collection := ds.db.Collection("Service")
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Fatal(err)
+		return nil
 	}
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
@@ -189,11 +163,28 @@ func (ds DataSource) getServices(ctx context.Context) []Service {
 		err := cur.Decode(&result)
 		if err != nil {
 			log.Fatal(err)
+			return nil
 		}
 		services = append(services, result)
 	}
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
+		return nil
 	}
 	return services
+}
+
+//добавление нового сервиса
+func (ds DataSource) addService(ctx context.Context, nameService string) primitive.ObjectID {
+	idService := primitive.NewObjectID()
+	s := Service{
+		Name: nameService,
+		Id:   idService,
+	}
+	collection := ds.db.Collection("Service")
+	_, err := collection.InsertOne(ctx, s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return idService
 }
