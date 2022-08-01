@@ -19,6 +19,7 @@ func (h *handler) ShowPreventiveWork(c *gin.Context) {
 	data := h.ds.FindPreventiveWorkByID(id, context.TODO())
 	if data == nil {
 		c.Status(http.StatusNotFound)
+		h.logger.Infof("Профилактической работы с id: %s не существует", id)
 		return
 	}
 	c.Data(http.StatusOK, gin.MIMEJSON, data)

@@ -18,7 +18,7 @@ import (
 // @Success      200
 // @Router       /{id}/new_event [put]
 func (h *handler) NewEvent(c *gin.Context) {
-	//idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string
+	h.logger.Info("создание нового события в профилактической работе")
 	id := c.Param("id")
 	status := c.PostForm("status")
 	createAtString := c.PostForm("create_at")
@@ -28,11 +28,19 @@ func (h *handler) NewEvent(c *gin.Context) {
 	createAt, err := time.Parse("2006-01-02 15:04:05", createAtString)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
+		h.logger.Debug("дата создания введена неверно")
 	}
+
 	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
+		h.logger.Debug("дата окончания введена неверно")
 	}
-	h.ds.AddNewEvent(context.TODO(), id, createAt, deadline, description, status)
-	c.Status(http.StatusOK)
+
+	err = h.ds.AddNewEvent(context.TODO(), id, createAt, deadline, description, status)
+	if err != nil {
+		c.Status(http.StatusNotFound)
+	} else {
+		c.Status(http.StatusOK)
+	}
 }

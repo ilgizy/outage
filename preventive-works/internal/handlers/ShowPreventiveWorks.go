@@ -15,11 +15,10 @@ import (
 // @Router       / [get]
 func (h *handler) ShowPreventiveWorks(c *gin.Context) {
 	data := h.ds.GetPreventiveWorkJson(context.TODO())
-	if len(data) == 0 {
+	if data == nil {
 		c.String(http.StatusOK, "Профилактические работы отсутствуют")
+		h.logger.Info("Профилактические работы отсутствуют")
 		return
 	}
 	c.Data(http.StatusOK, gin.MIMEJSON, data)
-
-	//c.AsciiJSON(http.StatusOK, string(h.ds.GetPreventiveWorkJson()))
 }

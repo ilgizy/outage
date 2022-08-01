@@ -2,29 +2,32 @@ package models
 
 import (
 	"PreventiveWork/pkg/client/mongodb"
+	"PreventiveWork/pkg/logging"
 	"context"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"time"
 )
 
 type DataSource struct {
-	db *mongo.Database
+	db     *mongo.Database
+	logger logging.Logger
 }
 
-func (ds *DataSource) New() {
+func (ds *DataSource) New(logger logging.Logger) {
+	ds.logger = logger
 	client, err := mongodb.NewClient(context.TODO(), "mongo", "27017", "root", "root", "PreventiveWork")
 	if err != nil {
-		return
+		logger.Fatal("нет подключения к базе данных")
 	}
+	logger.Info("успешное подключение к базе данных")
 	ds.db = client
 }
 
 //добавление новой профилактической работы
-func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) {
+func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) (err error) {
 	//проверяет есть ли сервис с таким именем, если есть, то запоминаем его id, если нет, то добавляем новый
 	services := ds.getServices(ctx)
 	flag := true
@@ -36,7 +39,10 @@ func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService stri
 		}
 	}
 	if flag {
-		ds.addService(ctx, nameService)
+		idService, err = ds.addService(ctx, nameService)
+		if err != nil {
+			return err
+		}
 	}
 
 	//создание первого события в профилактической работе
@@ -59,14 +65,16 @@ func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService stri
 
 	//добавление профилактической работы в базу данных
 	collection := ds.db.Collection("PreventiveWork")
-	_, err := collection.InsertOne(ctx, preventiveWork)
+	_, err = collection.InsertOne(ctx, preventiveWork)
 	if err != nil {
-		log.Fatal(err)
+		ds.logger.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // добавление нового события в профилактическую работу
-func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) {
+func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) (err error) {
 	event := Event{
 		CreateAt:    createAt,
 		Deadline:    deadline,
@@ -74,14 +82,20 @@ func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, 
 		Status:      status,
 	}
 
-	idObject, _ := primitive.ObjectIDFromHex(idPreventiveWork)
+	idObject, err := primitive.ObjectIDFromHex(idPreventiveWork)
+	if err != nil {
+		ds.logger.Fatal(err)
+		return err
+	}
 	collection := ds.db.Collection("PreventiveWork")
 	filter := bson.M{"_id": idObject}
 	update := bson.M{"$push": bson.M{"events": event}}
-	_, err := collection.UpdateOne(ctx, filter, update)
+	_, err = collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		log.Fatal(err)
+		ds.logger.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 //Возвращает профилактическую работу в формате json по ее id
@@ -92,36 +106,14 @@ func (ds *DataSource) FindPreventiveWorkByID(id string, ctx context.Context) []b
 	filter := bson.D{{"_id", idObject}}
 	err := collection.FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {
+		ds.logger.Error(err)
 		return nil
 	} else if err != nil {
-		log.Fatal(err)
+		ds.logger.Error(err)
+		return nil
 	}
 	preventiveWork, _ := json.Marshal(&result)
 	return preventiveWork
-}
-
-//Возвращает список всех сервисов в формате json
-func (ds DataSource) GetServiceJson(ctx context.Context) []byte {
-	var services []byte
-	collection := ds.db.Collection("Service")
-	cur, err := collection.Find(ctx, bson.D{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cur.Close(ctx)
-	for cur.Next(ctx) {
-		var result Service
-		err := cur.Decode(&result)
-		if err != nil {
-			log.Fatal(err)
-		}
-		serviceJSON, _ := json.Marshal(result)
-		services = append(services, serviceJSON...)
-	}
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return services
 }
 
 //Возвращает список всех профилактических работ в формате json
@@ -130,20 +122,23 @@ func (ds DataSource) GetPreventiveWorkJson(ctx context.Context) []byte {
 	collection := ds.db.Collection("PreventiveWork")
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		ds.logger.Error(err)
+		return nil
 	}
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
 		var result PreventiveWork
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			ds.logger.Error(err)
+			return nil
 		}
 		preventiveWorkJSON, _ := json.Marshal(result)
 		preventiveWork = append(preventiveWork, preventiveWorkJSON...)
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		ds.logger.Error(err)
+		return nil
 	}
 	return preventiveWork
 }
@@ -154,7 +149,7 @@ func (ds DataSource) getServices(ctx context.Context) []Service {
 	collection := ds.db.Collection("Service")
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		ds.logger.Error(err)
 		return nil
 	}
 	defer cur.Close(ctx)
@@ -162,20 +157,20 @@ func (ds DataSource) getServices(ctx context.Context) []Service {
 		var result Service
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			ds.logger.Error(err)
 			return nil
 		}
 		services = append(services, result)
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		ds.logger.Error(err)
 		return nil
 	}
 	return services
 }
 
 //добавление нового сервиса
-func (ds DataSource) addService(ctx context.Context, nameService string) primitive.ObjectID {
+func (ds DataSource) addService(ctx context.Context, nameService string) (primitive.ObjectID, error) {
 	idService := primitive.NewObjectID()
 	s := Service{
 		Name: nameService,
@@ -184,7 +179,8 @@ func (ds DataSource) addService(ctx context.Context, nameService string) primiti
 	collection := ds.db.Collection("Service")
 	_, err := collection.InsertOne(ctx, s)
 	if err != nil {
-		log.Fatal(err)
+		ds.logger.Fatal(err)
+		return idService, err
 	}
-	return idService
+	return idService, nil
 }

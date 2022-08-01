@@ -3,6 +3,7 @@ package main
 import (
 	"PreventiveWork/internal/handlers"
 	"PreventiveWork/internal/models"
+	"PreventiveWork/pkg/logging"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,13 +14,16 @@ var router *gin.Engine
 // @description     API для отслеживания профилактических работ
 // @host      localhost:8101
 func main() {
+	logger := logging.GetLogger()
 
 	var ds models.DataSource
-	ds.New()
+	ds.New(logger)
 
 	router = gin.Default()
-	handler := handlers.NewHandler(ds)
-	handler.Register(router)
-	router.Run()
+	logger.Info("создан новый роутер")
 
+	handler := handlers.NewHandler(ds, logger)
+	handler.Register(router)
+
+	router.Run()
 }
