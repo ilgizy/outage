@@ -36,6 +36,11 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 		h.logger.Debug("дата окончания введена неверно")
 	}
 
+	if deadline.Before(createAt) {
+		c.Status(http.StatusBadRequest)
+		h.logger.Debug("дата окончания не может быть раньше даты создания")
+	}
+
 	err = h.ds.AddNewPreventiveWork(context.TODO(), nameService, createAt, deadline, title, description)
 	if err != nil {
 		c.Status(http.StatusNotFound)

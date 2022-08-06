@@ -37,6 +37,10 @@ func (h *handler) NewEvent(c *gin.Context) {
 		h.logger.Debug("дата окончания введена неверно")
 	}
 
+	if deadline.Before(createAt) {
+		c.Status(http.StatusBadRequest)
+		h.logger.Debug("дата окончания не может быть раньше даты создания")
+	}
 	err = h.ds.AddNewEvent(context.TODO(), id, createAt, deadline, description, status)
 	if err != nil {
 		c.Status(http.StatusNotFound)
