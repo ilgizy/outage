@@ -13,12 +13,13 @@ import (
 //@Accept       json
 //@Produce      json
 //@Success      200  {object}  models.PreventiveWork
+// @Failure      404  {object}  int
 //@Router       /{id} [get]
 func (h *handler) ShowPreventiveWork(c *gin.Context) {
 	id := c.Param("id")
 	data := h.ds.FindPreventiveWorkByID(id, context.TODO())
 	if data == nil {
-		c.Status(http.StatusNotFound)
+		c.String(http.StatusNotFound, "Профилактической работы с запрашиваемым id не существует")
 		h.logger.Infof("Профилактической работы с id: %s не существует", id)
 		return
 	}

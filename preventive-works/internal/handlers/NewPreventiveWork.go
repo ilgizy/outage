@@ -16,6 +16,8 @@ import (
 // @Param        title    formData     string  true  "Название профил. работы"
 // @Param        description    formData     string  true  "Описание профил. работы"
 // @Success      200
+// @Failure      404  {object}  int
+// @Failure      500  {object}  int
 // @Router       /new_work [post]
 func (h *handler) NewPreventiveWork(c *gin.Context) {
 	h.logger.Info("создание новой профилактической работы")
@@ -27,17 +29,17 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 
 	createAt, err := time.Parse("2006-01-02 15:04:05", createAtString)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
+		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания введена неверно")
 	}
 	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
+		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания введена неверно")
 	}
 
 	if deadline.Before(createAt) {
-		c.Status(http.StatusBadRequest)
+		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания не может быть раньше даты создания")
 	}
 

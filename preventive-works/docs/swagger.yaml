@@ -49,6 +49,10 @@ paths:
             items:
               $ref: '#/definitions/models.PreventiveWork'
             type: array
+        "404":
+          description: Not Found
+          schema:
+            type: integer
       summary: отображение всех профилактических работ
       tags:
       - PreventiveWorks
@@ -69,6 +73,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.PreventiveWork'
+        "404":
+          description: Not Found
+          schema:
+            type: integer
       summary: отображение профилактической работы по id
       tags:
       - PreventiveWork
@@ -103,9 +111,17 @@ paths:
       responses:
         "200":
           description: ""
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
       summary: добавление новой профилактической работы
       tags:
-      - NewPreventiveWork
+      - NewEvent
   /new_work:
     post:
       parameters:
@@ -137,6 +153,14 @@ paths:
       responses:
         "200":
           description: ""
+        "404":
+          description: Not Found
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            type: integer
       summary: добавление новой профилактической работы
       tags:
       - NewPreventiveWork

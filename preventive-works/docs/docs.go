@@ -37,6 +37,12 @@ const docTemplate = `{
                                 "$ref": "#/definitions/models.PreventiveWork"
                             }
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 }
             }
@@ -87,6 +93,18 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": ""
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 }
             }
@@ -118,6 +136,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.PreventiveWork"
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 }
             }
@@ -125,7 +149,7 @@ const docTemplate = `{
         "/{id}/new_event": {
             "put": {
                 "tags": [
-                    "NewPreventiveWork"
+                    "NewEvent"
                 ],
                 "summary": "добавление новой профилактической работы",
                 "parameters": [
@@ -168,6 +192,18 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": ""
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 }
             }

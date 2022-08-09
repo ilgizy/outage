@@ -12,11 +12,12 @@ import (
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  []models.PreventiveWork
+// @Failure      404  {object}  int
 // @Router       / [get]
 func (h *handler) ShowPreventiveWorks(c *gin.Context) {
 	data := h.ds.GetPreventiveWorkJson(context.TODO())
 	if data == nil {
-		c.String(http.StatusOK, "Профилактические работы отсутствуют")
+		c.String(http.StatusNotFound, "Профилактические работы отсутствуют")
 		h.logger.Info("Профилактические работы отсутствуют")
 		return
 	}
