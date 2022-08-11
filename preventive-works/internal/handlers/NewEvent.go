@@ -31,17 +31,20 @@ func (h *handler) NewEvent(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		h.logger.Debug("дата создания введена неверно")
+		return
 	}
 
 	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		h.logger.Debug("дата окончания введена неверно")
+		return
 	}
 
 	if deadline.Before(createAt) {
 		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания не может быть раньше даты создания")
+		return
 	}
 	err = h.ds.AddNewEvent(context.TODO(), id, createAt, deadline, description, status)
 	if err != nil {

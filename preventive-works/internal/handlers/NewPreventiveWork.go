@@ -31,22 +31,25 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания введена неверно")
+		return
 	}
 	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания введена неверно")
+		return
 	}
 
 	if deadline.Before(createAt) {
 		c.Status(http.StatusInternalServerError)
 		h.logger.Debug("дата окончания не может быть раньше даты создания")
+		return
 	}
 
-	err = h.ds.AddNewPreventiveWork(context.TODO(), nameService, createAt, deadline, title, description)
+	id, err := h.ds.AddNewPreventiveWork(context.TODO(), nameService, createAt, deadline, title, description)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 	} else {
-		c.Status(http.StatusOK)
+		c.String(http.StatusOK, id)
 	}
 }

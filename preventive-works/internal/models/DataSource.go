@@ -27,7 +27,7 @@ func (ds *DataSource) New(logger logging.Logger) {
 }
 
 //добавление новой профилактической работы
-func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) (err error) {
+func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) (id string, err error) {
 	//проверяет есть ли сервис с таким именем, если есть, то запоминаем его id, если нет, то добавляем новый
 	services := ds.getServices(ctx)
 	flag := true
@@ -41,7 +41,7 @@ func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService stri
 	if flag {
 		idService, err = ds.addService(ctx, nameService)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
@@ -65,12 +65,12 @@ func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService stri
 
 	//добавление профилактической работы в базу данных
 	collection := ds.db.Collection("PreventiveWork")
-	_, err = collection.InsertOne(ctx, preventiveWork)
+	idWork, err := collection.InsertOne(ctx, preventiveWork)
 	if err != nil {
 		ds.logger.Fatal(err)
-		return err
+		return "", err
 	}
-	return nil
+	return idWork.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
 // добавление нового события в профилактическую работу
