@@ -10,7 +10,6 @@ require (
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.1
 	github.com/swaggo/swag v1.8.3
-	github.com/swaggo/swag/example/celler v0.0.0-20220809130049-af1c5256a1b4
 	go.mongodb.org/mongo-driver v1.10.0
 )
 
