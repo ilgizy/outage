@@ -10,6 +10,32 @@ import (
 
 var _ = Describe("PreventiveWorks", func() {
 	var idPreventiveWork string
+
+	Describe("Проверка preventive_works/", func() {
+		Context("Проверка возвращаемых кодов", func() {
+			//It("Возвращает 404", func() {
+			//	resp, err := http.Get("http://localhost:8101/preventive_works/")
+			//	Expect(err).To(BeNil())
+			//	defer resp.Body.Close()
+			//	Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+			//})
+
+			It("Возвращает 200", func() {
+				resp, err := http.PostForm("http://localhost:8101/preventive_works/new_work", url.Values{
+					"name_service": {"test"},
+					"create_at":    {"2022-01-02 15:04:05"},
+					"deadline":     {"2022-01-04 15:04:05"},
+					"title":        {"test"},
+					"description":  {"test"}})
+				_, _ = http.Get("http://localhost:8101/preventive_works/")
+				Expect(err).To(BeNil())
+				defer resp.Body.Close()
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+
+		})
+	})
+
 	Describe("Проверка preventive_works/new_work", func() {
 		Context("Проверка возвращаемых кодов", func() {
 
@@ -163,4 +189,5 @@ var _ = Describe("PreventiveWorks", func() {
 			})
 		})
 	})
+
 })
