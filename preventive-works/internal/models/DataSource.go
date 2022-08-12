@@ -1,133 +1,186 @@
 package models
 
 import (
+	"PreventiveWork/pkg/client/mongodb"
+	"PreventiveWork/pkg/logging"
+	"context"
 	"encoding/json"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
 type DataSource struct {
-	Service        []Service        `json:"service"`
-	Event          []Event          `json:"event"`
-	PreventiveWork []PreventiveWork `json:"preventive_work"`
+	db     *mongo.Database
+	logger logging.Logger
 }
 
-func (ds *DataSource) New() {
-	ds.Service = []Service{
-		{Name: "Go", Id: 0},
-		{Name: "С#", Id: 1},
+func (ds *DataSource) New(logger logging.Logger) {
+	ds.logger = logger
+	client, err := mongodb.NewClient(context.TODO(), "mongo", "27017", "root", "root", "PreventiveWork")
+	if err != nil {
+		logger.Fatal("нет подключения к базе данных")
 	}
-
-	ds.PreventiveWork = []PreventiveWork{
-		{Id: 0, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача1", Description: "Описание задачи 1", CountEvent: 3, IdService: 1},
-		{Id: 1, CreateAt: time.Date(2022, time.June, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача2", Description: "Описание задачи 2", CountEvent: 3, IdService: 0},
-		{Id: 2, CreateAt: time.Date(2022, time.February, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Title: "Задача3", Description: "Описание задачи 3", CountEvent: 3, IdService: 1},
-	}
-
-	ds.Event = []Event{
-		{Id: 0, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 0},
-		{Id: 1, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 0},
-		{Id: 2, CreateAt: time.Date(2022, time.March, 4, 17, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 17, 30, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 0},
-
-		{Id: 3, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 1},
-		{Id: 4, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 1},
-		{Id: 5, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 1},
-
-		{Id: 6, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Создана задача", Status: "Запланировано", IdPreventiveWork: 2},
-		{Id: 7, CreateAt: time.Date(2022, time.March, 4, 16, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 16, 30, 15, 15, time.UTC), Description: "Сделано", Status: "Обновлено", IdPreventiveWork: 2},
-		{Id: 8, CreateAt: time.Date(2022, time.March, 4, 15, 15, 15, 15, time.UTC), Deadline: time.Date(2022, time.March, 4, 18, 15, 15, 15, time.UTC), Description: "Закрыто", Status: "Завершено", IdPreventiveWork: 2},
-	}
+	logger.Info("успешное подключение к базе данных")
+	ds.db = client
 }
 
-func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, idPreventiveWork int, createAt time.Time, deadline time.Time, title string, description string) {
+//добавление новой профилактической работы
+func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService string, createAt time.Time, deadline time.Time, title string, description string) (id string, err error) {
+	//проверяет есть ли сервис с таким именем, если есть, то запоминаем его id, если нет, то добавляем новый
+	services := ds.getServices(ctx)
 	flag := true
-	for _, service := range ds.Service {
-		if idService == service.Id {
+	var idService primitive.ObjectID
+	for _, service := range services {
+		if nameService == service.Name {
 			flag = false
+			idService = service.Id
 		}
 	}
 	if flag {
-		service := Service{
-			Name: nameService,
-			Id:   idService,
+		idService, err = ds.addService(ctx, nameService)
+		if err != nil {
+			return "", err
 		}
-		ds.Service = append(ds.Service, service)
 	}
 
+	//создание первого события в профилактической работе
+	event := Event{
+		CreateAt:    createAt,
+		Deadline:    deadline,
+		Description: description,
+		Status:      "Запланированно",
+	}
+	var events []Event
+	events = append(events, event)
 	preventiveWork := PreventiveWork{
-		Id:          idPreventiveWork,
 		CreateAt:    createAt,
 		Deadline:    deadline,
 		Title:       title,
 		Description: description,
-		CountEvent:  1,
 		IdService:   idService,
-	}
-	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
-
-	event := Event{
-		Id:               0,
-		CreateAt:         createAt,
-		Deadline:         deadline,
-		Description:      description,
-		Status:           "Запланированно",
-		IdPreventiveWork: idPreventiveWork,
+		Events:      events,
 	}
 
-	ds.Event = append(ds.Event, event)
+	//добавление профилактической работы в базу данных
+	collection := ds.db.Collection("PreventiveWork")
+	idWork, err := collection.InsertOne(ctx, preventiveWork)
+	if err != nil {
+		ds.logger.Error(err)
+		return "", err
+	}
+	return idWork.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (ds *DataSource) AddNewEvent(idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
+// добавление нового события в профилактическую работу
+func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, createAt time.Time, deadline time.Time, description string, status string) (err error) {
 	event := Event{
-		Id:               idEvent,
-		CreateAt:         createAt,
-		Deadline:         deadline,
-		Description:      description,
-		Status:           status,
-		IdPreventiveWork: idPreventiveWork,
+		CreateAt:    createAt,
+		Deadline:    deadline,
+		Description: description,
+		Status:      status,
 	}
-	ds.Event = append(ds.Event, event)
-}
 
-func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
-	for _, work := range ds.PreventiveWork {
-		if work.Id == id {
-			var events []Event
-			for _, event := range ds.Event {
-				if event.IdPreventiveWork == id {
-				}
-				events = append(events, event)
-			}
-			work.Events = events
-			preventiveWork, _ := json.Marshal(&work)
-			return preventiveWork
-		}
+	idObject, err := primitive.ObjectIDFromHex(idPreventiveWork)
+	if err != nil {
+		ds.logger.Error(err)
+		return err
+	}
+	collection := ds.db.Collection("PreventiveWork")
+	filter := bson.M{"_id": idObject}
+	update := bson.M{"$push": bson.M{"events": event}}
+	_, err = collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		ds.logger.Error(err)
+		return err
 	}
 	return nil
 }
 
-func (ds DataSource) GetServiceJson() []byte {
-	var services []byte
-	for _, service := range ds.Service {
-		serviceJSON, _ := json.Marshal(service)
-		services = append(services, serviceJSON...)
+//Возвращает профилактическую работу в формате json по ее id
+func (ds *DataSource) FindPreventiveWorkByID(id string, ctx context.Context) []byte {
+	var result PreventiveWork
+	collection := ds.db.Collection("PreventiveWork")
+	idObject, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{"_id", idObject}}
+	err := collection.FindOne(ctx, filter).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		ds.logger.Error(err)
+		return nil
+	} else if err != nil {
+		ds.logger.Error(err)
+		return nil
 	}
-	return services
+	preventiveWork, _ := json.Marshal(&result)
+	return preventiveWork
 }
 
-func (ds DataSource) GetPreventiveWorkJson() []byte {
+//Возвращает список всех профилактических работ в формате json
+func (ds DataSource) GetPreventiveWorkJson(ctx context.Context) []byte {
 	var preventiveWork []byte
-	for _, work := range ds.PreventiveWork {
-		workJSON, _ := json.Marshal(work)
-		preventiveWork = append(preventiveWork, workJSON...)
+	collection := ds.db.Collection("PreventiveWork")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		ds.logger.Error(err)
+		return nil
+	}
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result PreventiveWork
+		err := cur.Decode(&result)
+		if err != nil {
+			ds.logger.Error(err)
+			return nil
+		}
+		preventiveWorkJSON, _ := json.Marshal(result)
+		preventiveWork = append(preventiveWork, preventiveWorkJSON...)
+	}
+	if err := cur.Err(); err != nil {
+		ds.logger.Error(err)
+		return nil
 	}
 	return preventiveWork
 }
 
-func (ds DataSource) GetEventJson() []byte {
-	var events []byte
-	for _, event := range ds.Event {
-		eventJSON, _ := json.Marshal(event)
-		events = append(events, eventJSON...)
+// возвращает список всех сервисов
+func (ds DataSource) getServices(ctx context.Context) []Service {
+	var services []Service
+	collection := ds.db.Collection("Service")
+	cur, err := collection.Find(ctx, bson.D{})
+	if err != nil {
+		ds.logger.Error(err)
+		return nil
 	}
-	return events
+	defer cur.Close(ctx)
+	for cur.Next(ctx) {
+		var result Service
+		err := cur.Decode(&result)
+		if err != nil {
+			ds.logger.Error(err)
+			return nil
+		}
+		services = append(services, result)
+	}
+	if err := cur.Err(); err != nil {
+		ds.logger.Error(err)
+		return nil
+	}
+	return services
+}
+
+//добавление нового сервиса
+func (ds DataSource) addService(ctx context.Context, nameService string) (primitive.ObjectID, error) {
+	idService := primitive.NewObjectID()
+	s := Service{
+		Name: nameService,
+		Id:   idService,
+	}
+	collection := ds.db.Collection("Service")
+	_, err := collection.InsertOne(ctx, s)
+	if err != nil {
+		ds.logger.Error(err)
+		return idService, err
+	}
+	return idService, nil
 }

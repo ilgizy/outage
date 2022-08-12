@@ -1,41 +1,29 @@
 package main
 
 import (
+	"PreventiveWork/internal/handlers"
+	"PreventiveWork/internal/models"
+	"PreventiveWork/pkg/logging"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 var router *gin.Engine
 
+// @title           preventive-works
+// @version         1.0
+// @description     API для отслеживания профилактических работ
+// @host      localhost:8101
 func main() {
+	logger := logging.GetLogger()
 
-	// Set the router as the default one provided by Gin
+	var ds models.DataSource
+	ds.New(logger)
+
 	router = gin.Default()
+	logger.Info("создан новый роутер")
 
-	// Process the templates at the start so that they don't have to be loaded
-	// from the disk again. This makes serving HTML pages very fast.
-	router.LoadHTMLGlob("./templates/*")
+	handler := handlers.NewHandler(ds, logger)
+	handler.Register(router)
 
-	// Define the route for the index page and display the index.html template
-	// To start with, we'll use an inline route handler. Later on, we'll create
-	// standalone functions that will be used as route handlers.
-	router.GET("/", func(c *gin.Context) {
-
-		// Call the HTML method of the Context to render a template
-		c.HTML(
-			// Set the HTTP status to 200 (OK)
-			http.StatusOK,
-			// Use the index.html template
-			"index.gohtml",
-			// Pass the data that the page uses (in this case, 'title')
-			gin.H{
-				"title": "Home Page",
-			},
-		)
-
-	})
-
-	// Start serving the application
 	router.Run()
-
 }
