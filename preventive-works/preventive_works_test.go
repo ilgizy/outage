@@ -80,112 +80,68 @@ var _ = Describe("PreventiveWorks", func() {
 			})
 		})
 
-		Context("Проверка возвращаемого json", func() {
-			var rightJSON []byte
-			BeforeEach(func() {
-				_ = json.Unmarshal([]byte("{\"id\": \"\","+
-					"\"create_at\": \"2022-08-10T15:04:05Z\","+
-					"\"deadline\": \"2022-08-12T15:04:05Z\","+
-					"\"title\": \"test\","+
-					"\"description\": \"test\","+
-					"\"id_service\": \"62f418db2bd229c57883ab61\","+
-					"\"events\": [{"+
-					"\"create_at\": \"2022-08-10T15:04:05Z\","+
-					"\"deadline\": \"2022-08-12T15:04:05Z\","+
-					"\"description\": \"test\","+
-					"\"status\": \"Запланированно\""+
-					"}]}"), &rightJSON)
-			})
-			It("Возвращает json", func() {
+		Describe("Проверка preventive_works/{id}", func() {
 
-				resp, err := http.Get("http://localhost:8101/preventive_works/" + idPreventiveWork)
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
+			Context("Проверка возвращаемых кодов", func() {
 
-				var returnBody []byte
-				_, err = resp.Body.Read(returnBody)
-				if err != nil {
-					return
-				}
-				Expect(returnBody).To(Equal(rightJSON))
+				It("Возвращает 200", func() {
+					resp, err := http.Get("http://localhost:8101/preventive_works/" + idPreventiveWork)
+					Expect(err).To(BeNil())
+					defer resp.Body.Close()
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+				})
+
+				It("Возвращает 404", func() {
+					resp, err := http.Get("http://localhost:8101/preventive_works/1")
+					Expect(err).To(BeNil())
+					defer resp.Body.Close()
+					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+				})
 			})
 
-			It("Возвращает 0, когда значение отсутствует", func() {
+			Context("Проверка возвращаемого json", func() {
+				var rightJSON []byte
+				BeforeEach(func() {
+					_ = json.Unmarshal([]byte("{\"id\": \"\","+
+						"\"create_at\": \"2022-01-02T15:04:05.000Z\","+
+						"\"deadline\": \"2022-01-04T15:04:05.000Z\","+
+						"\"title\": \"test\","+
+						"\"description\": \"test\","+
+						"\"id_service\": \"62f4eac8f16f2780ae3e637c\","+
+						"\"events\": [{"+
+						"\"create_at\": \"2022-01-02T15:04:05.000Z\","+
+						"\"deadline\": \"2022-01-04T15:04:05.000Z\","+
+						"\"description\": \"test\","+
+						"\"status\": \"Запланированно\""+
+						"}]}"), &rightJSON)
+				})
+				It("Возвращает json", func() {
 
-				resp, err := http.Get("http://localhost:8101/preventive_works/1")
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
+					resp, err := http.Get("http://localhost:8101/preventive_works/" + idPreventiveWork)
+					Expect(err).To(BeNil())
+					defer resp.Body.Close()
 
-				var returnBody []byte
-				_, err = resp.Body.Read(returnBody)
-				if err != nil {
-					return
-				}
-				Expect(returnBody).To(BeZero())
-			})
-		})
-	})
+					var returnBody []byte
+					err = json.NewDecoder(resp.Body).Decode(&returnBody)
+					if err != nil {
+						return
+					}
+					Expect(returnBody).To(MatchJSON(rightJSON))
+				})
 
-	Describe("Проверка preventive_works/{id}", func() {
-		Context("Проверка возвращаемых кодов", func() {
+				It("Возвращает 0, когда значение отсутствует", func() {
 
-			It("Возвращает 200", func() {
-				resp, err := http.Get("http://localhost:8101/preventive_works/" + idPreventiveWork)
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
-				Expect(resp.StatusCode).To(Equal(http.StatusOK))
-			})
+					resp, err := http.Get("http://localhost:8101/preventive_works/1")
+					Expect(err).To(BeNil())
+					defer resp.Body.Close()
 
-			It("Возвращает 404", func() {
-				resp, err := http.Get("http://localhost:8101/preventive_works/1")
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
-				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
-			})
-		})
-
-		Context("Проверка возвращаемого json", func() {
-			var rightJSON []byte
-			BeforeEach(func() {
-				_ = json.Unmarshal([]byte("{\"id\": \"\","+
-					"\"create_at\": \"2022-08-10T15:04:05Z\","+
-					"\"deadline\": \"2022-08-12T15:04:05Z\","+
-					"\"title\": \"test\","+
-					"\"description\": \"test\","+
-					"\"id_service\": \"62f418db2bd229c57883ab61\","+
-					"\"events\": [{"+
-					"\"create_at\": \"2022-08-10T15:04:05Z\","+
-					"\"deadline\": \"2022-08-12T15:04:05Z\","+
-					"\"description\": \"test\","+
-					"\"status\": \"Запланированно\""+
-					"}]}"), &rightJSON)
-			})
-			It("Возвращает json", func() {
-
-				resp, err := http.Get("http://localhost:8101/preventive_works/" + idPreventiveWork)
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
-
-				var returnBody []byte
-				err = json.NewDecoder(resp.Body).Decode(&returnBody)
-				if err != nil {
-					return
-				}
-				Expect(returnBody).To(MatchJSON(rightJSON))
-			})
-
-			It("Возвращает 0, когда значение отсутствует", func() {
-
-				resp, err := http.Get("http://localhost:8101/preventive_works/1")
-				Expect(err).To(BeNil())
-				defer resp.Body.Close()
-
-				var returnBody []byte
-				_, err = resp.Body.Read(returnBody)
-				if err != nil {
-					return
-				}
-				Expect(returnBody).To(BeZero())
+					var returnBody []byte
+					_, err = resp.Body.Read(returnBody)
+					if err != nil {
+						return
+					}
+					Expect(returnBody).To(BeZero())
+				})
 			})
 		})
 	})
