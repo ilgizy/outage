@@ -29,13 +29,13 @@ func (h *handler) NewPreventiveWork(c *gin.Context) {
 
 	createAt, err := time.Parse("2006-01-02 15:04:05", createAtString)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Status(http.StatusBadRequest)
 		h.logger.Debug("дата окончания введена неверно")
 		return
 	}
 	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Status(http.StatusBadRequest)
 		h.logger.Debug("дата окончания введена неверно")
 		return
 	}

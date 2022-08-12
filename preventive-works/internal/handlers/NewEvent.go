@@ -24,20 +24,20 @@ func (h *handler) NewEvent(c *gin.Context) {
 	id := c.Param("id")
 	status := c.PostForm("status")
 	createAtString := c.PostForm("create_at")
-	deadlineSTring := c.PostForm("deadline")
+	deadlineString := c.PostForm("deadline")
 	description := c.PostForm("description")
 
 	createAt, err := time.Parse("2006-01-02 15:04:05", createAtString)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
-		h.logger.Debug("дата создания введена неверно")
+		h.logger.Debug("дата создания введена неверно", err)
 		return
 	}
 
-	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineSTring)
+	deadline, err := time.Parse("2006-01-02 15:04:05", deadlineString)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
-		h.logger.Debug("дата окончания введена неверно")
+		h.logger.Debug("дата окончания введена неверно", err)
 		return
 	}
 
