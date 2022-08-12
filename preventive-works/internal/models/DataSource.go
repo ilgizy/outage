@@ -67,7 +67,7 @@ func (ds *DataSource) AddNewPreventiveWork(ctx context.Context, nameService stri
 	collection := ds.db.Collection("PreventiveWork")
 	idWork, err := collection.InsertOne(ctx, preventiveWork)
 	if err != nil {
-		ds.logger.Fatal(err)
+		ds.logger.Error(err)
 		return "", err
 	}
 	return idWork.InsertedID.(primitive.ObjectID).Hex(), nil
@@ -84,7 +84,7 @@ func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, 
 
 	idObject, err := primitive.ObjectIDFromHex(idPreventiveWork)
 	if err != nil {
-		ds.logger.Fatal(err)
+		ds.logger.Error(err)
 		return err
 	}
 	collection := ds.db.Collection("PreventiveWork")
@@ -92,7 +92,7 @@ func (ds *DataSource) AddNewEvent(ctx context.Context, idPreventiveWork string, 
 	update := bson.M{"$push": bson.M{"events": event}}
 	_, err = collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		ds.logger.Fatal(err)
+		ds.logger.Error(err)
 		return err
 	}
 	return nil
@@ -179,7 +179,7 @@ func (ds DataSource) addService(ctx context.Context, nameService string) (primit
 	collection := ds.db.Collection("Service")
 	_, err := collection.InsertOne(ctx, s)
 	if err != nil {
-		ds.logger.Fatal(err)
+		ds.logger.Error(err)
 		return idService, err
 	}
 	return idService, nil
