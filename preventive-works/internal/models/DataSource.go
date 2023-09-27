@@ -38,31 +38,34 @@ func (ds *DataSource) New() {
 	}
 }
 
-func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, idPreventiveWork int, createAt time.Time, deadline time.Time, title string, description string) {
+//добавление новой профилактической работы
+func (ds *DataSource) AddNewPreventiveWork(nameService string, createAt time.Time, deadline time.Time, title string, description string) {
 	flag := true
+	var s = Service{}
 	for _, service := range ds.Service {
-		if idService == service.Id {
+		if nameService == service.Name {
 			flag = false
+			s = service
 		}
 	}
 	if flag {
 		service := Service{
 			Name: nameService,
-			Id:   idService,
+			Id:   len(ds.Service),
 		}
+		s = service
 		ds.Service = append(ds.Service, service)
 	}
 
 	preventiveWork := PreventiveWork{
-		Id:          idPreventiveWork,
+		Id:          len(ds.PreventiveWork),
 		CreateAt:    createAt,
 		Deadline:    deadline,
 		Title:       title,
 		Description: description,
 		CountEvent:  1,
-		IdService:   idService,
+		IdService:   s.Id,
 	}
-	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
 
 	event := Event{
 		Id:               0,
@@ -70,15 +73,16 @@ func (ds *DataSource) AddNewPreventiveWork(idService int, nameService string, id
 		Deadline:         deadline,
 		Description:      description,
 		Status:           "Запланированно",
-		IdPreventiveWork: idPreventiveWork,
+		IdPreventiveWork: len(ds.PreventiveWork),
 	}
-
+	ds.PreventiveWork = append(ds.PreventiveWork, preventiveWork)
 	ds.Event = append(ds.Event, event)
 }
 
-func (ds *DataSource) AddNewEvent(idEvent int, idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
+// добавление нового события в профилактическую работу
+func (ds *DataSource) AddNewEvent(idPreventiveWork int, createAt time.Time, deadline time.Time, description string, status string) {
 	event := Event{
-		Id:               idEvent,
+		Id:               len(ds.Event),
 		CreateAt:         createAt,
 		Deadline:         deadline,
 		Description:      description,
@@ -88,14 +92,16 @@ func (ds *DataSource) AddNewEvent(idEvent int, idPreventiveWork int, createAt ti
 	ds.Event = append(ds.Event, event)
 }
 
+//Возвращает профилактическую работу в формате json по ее id
 func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 	for _, work := range ds.PreventiveWork {
 		if work.Id == id {
 			var events []Event
 			for _, event := range ds.Event {
 				if event.IdPreventiveWork == id {
+					events = append(events, event)
 				}
-				events = append(events, event)
+
 			}
 			work.Events = events
 			preventiveWork, _ := json.Marshal(&work)
@@ -105,6 +111,7 @@ func (ds *DataSource) FindPreventiveWorkByID(id int) []byte {
 	return nil
 }
 
+//Возвращает список всех сервисов в формате json
 func (ds DataSource) GetServiceJson() []byte {
 	var services []byte
 	for _, service := range ds.Service {
@@ -114,6 +121,7 @@ func (ds DataSource) GetServiceJson() []byte {
 	return services
 }
 
+//Возвращает список всех профилактических работ в формате json
 func (ds DataSource) GetPreventiveWorkJson() []byte {
 	var preventiveWork []byte
 	for _, work := range ds.PreventiveWork {
@@ -123,6 +131,7 @@ func (ds DataSource) GetPreventiveWorkJson() []byte {
 	return preventiveWork
 }
 
+//Возвращает список всех событий в формате json
 func (ds DataSource) GetEventJson() []byte {
 	var events []byte
 	for _, event := range ds.Event {
